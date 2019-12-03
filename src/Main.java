@@ -14,7 +14,11 @@ public class Main {
         frame.setVisible(true);
         frame.setResizable(false);
 
-        rt.drawCoordImage();
+        //rt.drawCoordImage();
+        rt.rayTrace();
+
+        Ray testRay = new Ray(new Vec3(1.5, 2.1, 3.2), new Vec3(7.5, 2.3, 9.8));
+        System.out.println(testRay);
 
     }
 }

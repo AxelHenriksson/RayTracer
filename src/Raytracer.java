@@ -17,13 +17,36 @@ public class Raytracer extends JComponent {
     }
 
     public void drawCoordImage() {
-    for(int col = 0; col<width;col++) {
-        for (int row = 0; row < height; row++) {
-            image[col][row] = new Color((int) ((col / (double)width) * 255.0), (int) ((1.0-(row / (double)height)) * 255.0), 0);
+        for(int col = 0; col<width;col++) {
+            for (int row = 0; row < height; row++) {
+                image[col][row] = new Color(col / (float)width, 1.0f-(row / (float)height), 0.0f);
+            }
         }
+        repaint();
     }
-    repaint();
-}
+
+    Color testColor(Ray r) {
+        Vec3 unitDir = r.direction().unitVector();
+        double t = 0.5 * (unitDir.y + 1.0);
+        return new Vec3(1.0, 1.0, 1.0).mult(1.0-t).add(new Vec3(0.5, 0.7, 1.0).mult(t)).toColor();
+    }
+
+    public void rayTrace() {
+        Vec3 lowerLeft = new Vec3(-2.0, -1.0, -1.0);
+        Vec3 horizontal = new Vec3(4.0, 0.0, 0.0);
+        Vec3 vertical = new Vec3(0.0, 2.0, 0.0);
+        Vec3 origin = new Vec3(0, 0, 0);
+
+        for(int col = 0; col<width;col++) {
+            for (int row = 0; row < height; row++) {
+                double u = ((double) col)/width;
+                double v = ((double) row)/height;
+                Ray r = new Ray(origin, lowerLeft.add(horizontal.mult(u).add(vertical.mult(v))));
+                image[col][row] = testColor(r);
+            }
+        }
+        repaint();
+    }
 
     @Override
     public void paintComponent(Graphics g) {
