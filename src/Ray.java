@@ -1,13 +1,13 @@
 public class Ray {
-    Vec3 pos;
-    Vec3 dir;
+    private Vec3 pos;
+    private Vec3 dir;
 
     public Ray(Vec3 pos, Vec3 dir) {
         this.pos = pos;
         this.dir = dir;
     }
 
-    public Vec3 pointAtParameter(double t) { return pos.add(dir.mult(t)); }
+    public Vec3 pointAtParameter(double t) { return Vec3.add(pos, Vec3.multiply(dir, t)); }
 
     public Vec3 origin() { return pos; }
     public Vec3 direction() { return dir; }

@@ -8,11 +8,11 @@ public class Sphere extends Object {
 
     public double getRadius() { return radius; }
 
-    @Override boolean hit(Ray r) {
-        Vec3 oc = r.origin().subt(pos);
-        double a = r.direction().dot(r.direction());
-        double b = 2.0 * oc.dot(r.direction());
-        double c = oc.dot(oc) - radius*radius;
+    @Override boolean doesHit(Ray r) {
+        Vec3 oc = Vec3.subtract(r.origin(), pos);
+        double a = Vec3.dot(r.direction(), r.direction());
+        double b = 2.0 * Vec3.dot(oc, r.direction());
+        double c = Vec3.dot(oc, oc) - radius*radius;
         double discriminant = b*b - 4*a*c;
         return (discriminant > 0);
     }

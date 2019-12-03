@@ -3,14 +3,15 @@ import java.awt.*;
 
 public class Raytracer extends JComponent {
     private Color[][] image;
-    private int width, height, pixSize;
+    private int imageWidth, imageHeight, pixSize;
+    private Environment env;
 
     public Raytracer(int width, int height, int pixSize) {
-        this.width = width / pixSize;
-        this.height = height / pixSize;
+        this.imageWidth = width / pixSize;
+        this.imageHeight = height / pixSize;
         this.pixSize = pixSize;
 
-        image = new Color[this.width][this.height];
+        image = new Color[imageWidth][imageHeight];
 
         setBackground(Color.MAGENTA);
         setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
@@ -18,33 +19,48 @@ public class Raytracer extends JComponent {
 
 
 
-    Color testColor(Ray r) {
-        Vec3 unitDir = r.direction().unitVector();
-        double t = 0.5 * (unitDir.y + 1.0);
-        return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
-    }
 
     public void rayTrace() {
-        Vec3 lowerLeft = new Vec3(-2.0, -1.0, -1.0);
-        Vec3 horizontal = new Vec3(4.0, 0.0, 0.0);
-        Vec3 vertical = new Vec3(0.0, 2.0, 0.0);
+        double viewPlaneWidth = 4.0;
+        double viewPlaneHeight = viewPlaneWidth*((double) imageHeight/imageWidth);
+
+        Vec3 lowerLeft = new Vec3(-viewPlaneWidth/2.0, -viewPlaneHeight/2.0, -1.0);
+        Vec3 horizontal = new Vec3(viewPlaneWidth, 0.0, 0.0);
+        Vec3 vertical = new Vec3(0.0, viewPlaneHeight, 0.0);
         Vec3 origin = new Vec3(0, 0, 0);
 
-        for(int col = 0; col<width;col++) {
-            for (int row = 0; row < height; row++) {
-                double u = ((double) col)/width;
-                double v = ((double) row)/height;
-                Ray r = new Ray(origin, lowerLeft.add(horizontal.mult(u).add(vertical.mult(v))));
-                image[col][row] = testColor(r);
+        for(int col = 0; col<imageWidth;col++) {
+            for (int row = 0; row < imageHeight; row++) {
+                double u = ((double) col)/ imageWidth;
+                double v = ((double) row)/ imageHeight;
+                Ray r = new Ray(origin, Vec3.add(lowerLeft, Vec3.multiply(horizontal, u), Vec3.multiply(vertical, v)));
+                image[col][row] = color(r);
             }
         }
         repaint();
     }
 
+    private Color color(Ray r) {
+        if(env.doesHit(r)) {
+           return new Color(1.0f, 0.0f, 0.0f);
+        } else {
+            return getBackground(r);
+        }
+    }
+
+    private Color getBackground(Ray r) {
+        Vec3 unitDir = r.direction().unitVector();
+        double t = 0.5 * (unitDir.y + 1.0);
+        return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
+    }
+
+
+    public void setEnvironment(Environment env) { this.env = env; }
+
     @Override
     public void paintComponent(Graphics g) {
-        for(int col = 0; col < width; col++) {
-            for(int row = 0; row < height; row++) {
+        for(int col = 0; col < imageWidth; col++) {
+            for(int row = 0; row < imageHeight; row++) {
                 g.setColor(image[col][row]);
                 g.fillRect(col*pixSize, row*pixSize, pixSize, pixSize);
             }

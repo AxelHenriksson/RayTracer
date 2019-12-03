@@ -7,7 +7,7 @@ public class Object {
 
     public Vec3 getPos() { return pos; }
 
-    boolean hit(Ray r) {
+    boolean doesHit(Ray r) {
         return false;
     }
 }
