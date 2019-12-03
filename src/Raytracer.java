@@ -5,6 +5,8 @@ public class Raytracer extends JComponent {
     private Color[][] image;
     private int imageWidth, imageHeight, pixSize;
     private Environment env;
+    private double T_MIN = 0.0;
+    private double T_MAX = 1000.0;
 
     public Raytracer(int width, int height, int pixSize) {
         this.imageWidth = width / pixSize;
@@ -24,16 +26,16 @@ public class Raytracer extends JComponent {
         double viewPlaneWidth = 4.0;
         double viewPlaneHeight = viewPlaneWidth*((double) imageHeight/imageWidth);
 
-        Vec3 lowerLeft = new Vec3(-viewPlaneWidth/2.0, -viewPlaneHeight/2.0, -1.0);
+        Vec3 upperLeft = new Vec3(-viewPlaneWidth/2.0, viewPlaneHeight/2.0, -1.0);
         Vec3 horizontal = new Vec3(viewPlaneWidth, 0.0, 0.0);
-        Vec3 vertical = new Vec3(0.0, viewPlaneHeight, 0.0);
+        Vec3 vertical = new Vec3(0.0, -viewPlaneHeight, 0.0);
         Vec3 origin = new Vec3(0, 0, 0);
 
         for(int col = 0; col<imageWidth;col++) {
             for (int row = 0; row < imageHeight; row++) {
                 double u = ((double) col)/ imageWidth;
                 double v = ((double) row)/ imageHeight;
-                Ray r = new Ray(origin, Vec3.add(lowerLeft, Vec3.multiply(horizontal, u), Vec3.multiply(vertical, v)));
+                Ray r = new Ray(origin, Vec3.add(upperLeft, Vec3.multiply(horizontal, u), Vec3.multiply(vertical, v)));
                 image[col][row] = color(r);
             }
         }
@@ -41,11 +43,11 @@ public class Raytracer extends JComponent {
     }
 
     private Color color(Ray r) {
-        if(env.doesHit(r)) {
-           return new Color(1.0f, 0.0f, 0.0f);
-        } else {
-            return getBackground(r);
+        HitResult hr = env.hit(r, T_MIN, T_MAX);
+        if(hr != null) {
+            return new Color((float)((hr.n.x+1)*0.5), (float)((hr.n.y+1)*0.5), (float)((hr.n.z+1)*0.5));
         }
+        return getBackground(r);
     }
 
     private Color getBackground(Ray r) {

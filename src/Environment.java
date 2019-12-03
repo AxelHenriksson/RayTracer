@@ -1,21 +1,28 @@
 import java.util.ArrayList;
 
 public class Environment {
-    private ArrayList<Object> objects;
+    private ArrayList<Hitable> hitables;
 
 
     public Environment() {
-        objects = new ArrayList<>();
+        hitables = new ArrayList<>();
     }
 
-    public void add(Object object) {
-        objects.add(object);
+    public void add(Hitable hitable) {
+        hitables.add(hitable);
     }
 
-    public boolean doesHit(Ray r) {
-        for(Object object : objects) {
-            if(object.doesHit(r)) { return true; }
+    public HitResult hit(Ray r, double t_min, double t_max) {
+        HitResult hr = null;
+        HitResult tempHR;
+        double closest = t_max;
+        for(Hitable hitable : hitables) {
+            tempHR = hitable.hit(r, t_min, closest);
+            if (tempHR != null) {
+                closest = tempHR.t;
+                hr = tempHR;
+            }
         }
-        return false;
+        return hr;
     }
 }
