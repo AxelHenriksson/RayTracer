@@ -16,19 +16,12 @@ public class Raytracer extends JComponent {
         setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
     }
 
-    public void drawCoordImage() {
-        for(int col = 0; col<width;col++) {
-            for (int row = 0; row < height; row++) {
-                image[col][row] = new Color(col / (float)width, 1.0f-(row / (float)height), 0.0f);
-            }
-        }
-        repaint();
-    }
+
 
     Color testColor(Ray r) {
         Vec3 unitDir = r.direction().unitVector();
         double t = 0.5 * (unitDir.y + 1.0);
-        return new Vec3(1.0, 1.0, 1.0).mult(1.0-t).add(new Vec3(0.5, 0.7, 1.0).mult(t)).toColor();
+        return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
     }
 
     public void rayTrace() {
@@ -57,4 +50,15 @@ public class Raytracer extends JComponent {
             }
         }
     }
+
+    /*
+        public void drawCoordImage() {
+        for(int col = 0; col<width;col++) {
+            for (int row = 0; row < height; row++) {
+                image[col][row] = new Color(col / (float)width, 1.0f-(row / (float)height), 0.0f);
+            }
+        }
+        repaint();
+    }
+     */
 }
