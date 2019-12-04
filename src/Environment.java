@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class Environment {
     private ArrayList<Hitable> hitables;
-    Camera activeCamera;
+    Camera activeCam;
 
 
     public Environment() {

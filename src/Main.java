@@ -8,9 +8,10 @@ public class Main {
         env.add(new Sphere(new Vec3(0, 0, -1), 0.5));
         env.add(new Sphere(new Vec3(0.5, 0, -1), 0.5));
         env.add(new Sphere(new Vec3(0,-100.5,-1),100));
-        env.activeCamera = new Camera((int)(1024*(16/10.0)), 1024, 4.0);
+        env.activeCam = new Camera((int)(1024*(16/10.0)), 1024, 4.0);
 
-        Raytracer rt = new Raytracer((int)(1024*(16/10.0)), 1024, 1);
+        Raytracer rt = new Raytracer((int)(1024*(16/10.0)), 1024, 2);
+        rt.setSamples(100);
         rt.setClipDist(0.0, 1000.0);
         rt.setEnvironment(env);
 

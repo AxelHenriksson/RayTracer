@@ -7,6 +7,7 @@ public class Raytracer extends JComponent {
     private Environment env;
     private double t_min = 0.0;
     private double t_max = 1000.0;
+    private int samples = 100;
 
     public Raytracer(int width, int height, int pixSize) {
         this.imageWidth = width / pixSize;
@@ -22,20 +23,30 @@ public class Raytracer extends JComponent {
 
 
     public void traceNormals() {
-        Camera cam = env.activeCamera;
+        Camera cam = env.activeCam;
 
         for(int col = 0; col<imageWidth;col++) {
             for (int row = 0; row < imageHeight; row++) {
-                double u = ((double) col)/ imageWidth;
-                double v = ((double) row)/ imageHeight;
-                Ray r = cam.getRay(u, v);
-                image[col][row] = color(r);
+                double red = 0;
+                double green = 0;
+                double blue = 0;
+                for(int s = 0; s < samples; s++) {
+                    double u = ((double) col + Math.random()) / imageWidth;
+                    double v = ((double) row + Math.random()) / imageHeight;
+                    Ray r = cam.getRay(u, v);
+                    Color sColor = colorNormal(r);
+                    red += sColor.getRed()/255.0;
+                    green += sColor.getGreen()/255.0;
+                    blue += sColor.getBlue()/255.0;
+                }
+                Color color = new Color((float) red/samples, (float) green/samples, (float) blue/samples);
+                image[col][row] = color;
             }
         }
         repaint();
     }
 
-    private Color color(Ray r) {
+    private Color colorNormal(Ray r) {
         HitResult hr = env.hit(r,  t_min, t_max);
         if(hr != null) {
             return new Color((float)((hr.n.x+1)*0.5), (float)((hr.n.y+1)*0.5), (float)((hr.n.z+1)*0.5));
@@ -49,9 +60,9 @@ public class Raytracer extends JComponent {
         return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
     }
 
-
-    public void setEnvironment(Environment env) { this.env = env; }
-    public void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
+    void setSamples(int samples) {this.samples = samples; }
+    void setEnvironment(Environment env) { this.env = env; }
+    void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
 
     @Override
     public void paintComponent(Graphics g) {
