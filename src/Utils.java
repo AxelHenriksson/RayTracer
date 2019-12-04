@@ -14,4 +14,18 @@ public class Utils {
 
         return new Color((float)(r1*(1.0-fac) + r2*fac), (float)(g1*(1.0-fac) + g2*fac), (float)(b1*(1.0-fac) + b2*fac), (float)(a1*(1.0-fac) + a2*fac));
     }
+
+    public static Color multiply(Color color, double factor) {
+        int r = (int) (factor * color.getRed());
+        int g = (int) (factor * color.getGreen());
+        int b = (int) (factor * color.getBlue());
+        return new Color(r, g, b);
+    }
+
+    public static Color correctGamma(Color color, double gamma) {
+        float r = (float) (Math.pow(color.getRed()/255.0, 1/gamma));
+        float g = (float) (Math.pow(color.getGreen()/255.0, 1/gamma));
+        float b = (float) (Math.pow(color.getBlue()/255.0, 1/gamma));
+        return new Color(r, g, b);
+    }
 }

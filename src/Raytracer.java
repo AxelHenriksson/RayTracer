@@ -7,7 +7,8 @@ public class Raytracer extends JComponent {
     private Environment env;
     private double t_min = 0.0;
     private double t_max = 1000.0;
-    private int samples = 100;
+    private int samples;
+    double gamma;
 
     public Raytracer(int width, int height, int pixSize) {
         this.imageWidth = width / pixSize;
@@ -45,7 +46,6 @@ public class Raytracer extends JComponent {
         }
         repaint();
     }
-
     private Color colorNormal(Ray r) {
         HitResult hr = env.hit(r,  t_min, t_max);
         if(hr != null) {
@@ -54,10 +54,52 @@ public class Raytracer extends JComponent {
         return getBackground(r);
     }
 
+    public void traceDiffuse() {
+        Camera cam = env.activeCam;
+
+        for(int col = 0; col<imageWidth;col++) {
+            for (int row = 0; row < imageHeight; row++) {
+                double red = 0;
+                double green = 0;
+                double blue = 0;
+                for(int s = 0; s < samples; s++) {
+                    double u = ((double) col + Math.random()) / imageWidth;
+                    double v = ((double) row + Math.random()) / imageHeight;
+                    Ray r = cam.getRay(u, v);
+                    Color sColor = colorDiffuse(r);
+                    red += sColor.getRed()/255.0;
+                    green += sColor.getGreen()/255.0;
+                    blue += sColor.getBlue()/255.0;
+                }
+                Color color = new Color((float) red/samples, (float) green/samples, (float) blue/samples);
+                color = Utils.correctGamma(color, gamma);
+                image[col][row] = color;
+            }
+        }
+        repaint();
+    }
+
+    private Color colorDiffuse(Ray r) {
+        HitResult hr = env.hit(r,  t_min, t_max);
+        if(hr != null) {
+            Vec3 target = Vec3.add(hr.pos, hr.n, randomInUnitSphere());
+            return Utils.multiply(colorDiffuse(new Ray(hr.pos, Vec3.subtract(target, hr.pos))), 0.5);
+        }
+        return getBackground(r);
+    }
+
     private Color getBackground(Ray r) {
         Vec3 unitDir = r.direction().unitVector();
         double t = 0.5 * (unitDir.y + 1.0);
         return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
+    }
+
+    Vec3 randomInUnitSphere() {
+        Vec3 p;
+        do {
+            p = Vec3.subtract(Vec3.multiply(new Vec3(Math.random(), Math.random(), Math.random()), 2.0), new Vec3(1, 1, 1));
+        } while (p.length()*p.length() >= 1.0);
+        return p;
     }
 
     void setSamples(int samples) {this.samples = samples; }
