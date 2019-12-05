@@ -8,9 +8,10 @@ public class Raytracer extends JComponent {
     private double t_min = 0.001;
     private double t_max = 1000.0;
     private int samples;
+    private int depth;
     double gamma;
 
-    public Raytracer(int width, int height, int pixSize) {
+    Raytracer(int width, int height, int pixSize) {
         this.imageWidth = width / pixSize;
         this.imageHeight = height / pixSize;
         this.pixSize = pixSize;
@@ -23,7 +24,7 @@ public class Raytracer extends JComponent {
 
 
 
-    public void traceNormals() {
+    void traceNormals() {
         Camera cam = env.activeCam;
 
         for(int col = 0; col<imageWidth;col++) {
@@ -54,7 +55,7 @@ public class Raytracer extends JComponent {
         return getBackground(r);
     }
 
-    public void traceDiffuse() {
+    void traceDiffuse() {
         Camera cam = env.activeCam;
 
         for(int col = 0; col<imageWidth;col++) {
@@ -66,7 +67,7 @@ public class Raytracer extends JComponent {
                     double u = ((double) col + Math.random()) / imageWidth;
                     double v = ((double) row + Math.random()) / imageHeight;
                     Ray r = cam.getRay(u, v);
-                    Color sColor = colorDiffuse(r);
+                    Color sColor = colorDiffuse(r, 0);
                     red += sColor.getRed()/255.0;
                     green += sColor.getGreen()/255.0;
                     blue += sColor.getBlue()/255.0;
@@ -79,12 +80,11 @@ public class Raytracer extends JComponent {
         repaint();
     }
 
-    private Color colorDiffuse(Ray r) {
+    private Color colorDiffuse(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
-        if(hr != null) {
-            Vec3 target = Vec3.add(hr.pos, hr.n, Vec3.randomInUnitSphere());
-            return Utils.multiply(colorDiffuse(new Ray(hr.pos, Vec3.subtract(target, hr.pos))), 0.5);
-        }
+            if (depth < this.depth && hr != null) {
+                return Utils.multiply(colorDiffuse(hr.scattered, depth+1), hr.attenuation);
+            }
         return getBackground(r);
     }
 
@@ -95,6 +95,7 @@ public class Raytracer extends JComponent {
     }
 
     void setSamples(int samples) {this.samples = samples; }
+    void setDepth(int depth) { this.depth = depth; }
     void setEnvironment(Environment env) { this.env = env; }
     void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
 
