@@ -29,4 +29,12 @@ public class Vec3 {
     public String toString() {
         return String.format("(%.2f, %.2f, %.2f)", x, y, z);
     }
+
+    static Vec3 randomInUnitSphere() {
+        Vec3 p;
+        do {
+            p = Vec3.subtract(Vec3.multiply(new Vec3(Math.random(), Math.random(), Math.random()), 2.0), new Vec3(1, 1, 1));
+        } while (p.length() * p.length() >= 1.0);
+        return p;
+    }
 }

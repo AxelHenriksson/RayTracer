@@ -1,4 +1,4 @@
-public class Hitable {
+public abstract class Hitable {
     Vec3 pos;
 
     Hitable(Vec3 pos) {
@@ -7,7 +7,6 @@ public class Hitable {
 
     public Vec3 getPos() { return pos; }
 
-    HitResult hit(Ray r, double t_min, double t_max) {
-        return null;
-    }
+    abstract HitResult hit(Ray r, double t_min, double t_max);
+
 }

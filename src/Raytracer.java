@@ -5,7 +5,7 @@ public class Raytracer extends JComponent {
     private Color[][] image;
     private int imageWidth, imageHeight, pixSize;
     private Environment env;
-    private double t_min = 0.0;
+    private double t_min = 0.001;
     private double t_max = 1000.0;
     private int samples;
     double gamma;
@@ -92,14 +92,6 @@ public class Raytracer extends JComponent {
         Vec3 unitDir = r.direction().unitVector();
         double t = 0.5 * (unitDir.y + 1.0);
         return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
-    }
-
-    Vec3 randomInUnitSphere() {
-        Vec3 p;
-        do {
-            p = Vec3.subtract(Vec3.multiply(new Vec3(Math.random(), Math.random(), Math.random()), 2.0), new Vec3(1, 1, 1));
-        } while (p.length()*p.length() >= 1.0);
-        return p;
     }
 
     void setSamples(int samples) {this.samples = samples; }
