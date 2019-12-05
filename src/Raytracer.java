@@ -80,9 +80,9 @@ public class Raytracer extends JComponent {
     }
 
     private Color colorDiffuse(Ray r) {
-        HitResult hr = env.hit(r,  t_min, t_max);
+        HitResult hr = env.hit(r, t_min, t_max);
         if(hr != null) {
-            Vec3 target = Vec3.add(hr.pos, hr.n, randomInUnitSphere());
+            Vec3 target = Vec3.add(hr.pos, hr.n, Vec3.randomInUnitSphere());
             return Utils.multiply(colorDiffuse(new Ray(hr.pos, Vec3.subtract(target, hr.pos))), 0.5);
         }
         return getBackground(r);
