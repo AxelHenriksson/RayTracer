@@ -1,9 +1,11 @@
 import java.awt.*;
 
-public class Metal extends Material {
+public class Glass extends Material {
+    private double refIndex;
 
-    Metal(Color albedo) {
+    Glass(Color albedo, Double refIndex) {
         super(albedo);
+        this.refIndex = refIndex;
     }
 
     @Override

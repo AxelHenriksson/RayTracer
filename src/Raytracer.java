@@ -55,7 +55,7 @@ public class Raytracer extends JComponent {
         return getBackground(r);
     }
 
-    void traceDiffuse() {
+    void trace() {
         Camera cam = env.activeCam;
 
         for(int col = 0; col<imageWidth;col++) {
