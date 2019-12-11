@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Raytracer extends JComponent {
     private Color[][] image;
@@ -10,6 +12,10 @@ public class Raytracer extends JComponent {
     private int samples;
     private int depth;
     double gamma;
+
+    final int MAX_FPS = 60;
+    double fps;
+    Timer timer;
 
     Raytracer(int width, int height, int pixSize) {
         this.imageWidth = width / pixSize;
@@ -94,6 +100,13 @@ public class Raytracer extends JComponent {
         return Utils.lerp(new Color(1.0f, 1.0f, 1.0f), new Color(0.5f, 0.7f, 1.0f), t);
     }
 
+    public void traceLoop() {
+        TraceLoop loop = new TraceLoop();
+        timer = new Timer(1, loop);
+        timer.setInitialDelay(1);
+        timer.start();
+    }
+
     void setSamples(int samples) {this.samples = samples; }
     void setDepth(int depth) { this.depth = depth; }
     void setEnvironment(Environment env) { this.env = env; }
@@ -119,4 +132,22 @@ public class Raytracer extends JComponent {
         repaint();
     }
      */
+
+    private class TraceLoop implements ActionListener {
+        long lastMS;
+        long deltaMS;
+
+        TraceLoop() {
+            lastMS = System.currentTimeMillis();
+        }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+            try {
+                Thread.sleep((long) Math.max(0, (1.0 / MAX_FPS) * 1000 - (System.currentTimeMillis() - lastMS)));
+            } catch (InterruptedException exc) { exc.printStackTrace(); }
+        deltaMS = System.currentTimeMillis()-lastMS;
+            fps = (1.0/deltaMS)/1000.0;
+        trace();
+        }
+    }
 }
