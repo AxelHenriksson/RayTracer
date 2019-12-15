@@ -19,8 +19,8 @@ public class Utils {
 
     static Color multiply(Color c1, Color c2) {
         float r = colorIntToFloat(c2.getRed()) * colorIntToFloat(c1.getRed());
-        float g = colorIntToFloat(c2.getBlue()) * colorIntToFloat(c1.getBlue());
-        float b = colorIntToFloat(c2.getGreen()) * colorIntToFloat(c1.getGreen());
+        float g = colorIntToFloat(c2.getGreen()) * colorIntToFloat(c1.getGreen());
+        float b = colorIntToFloat(c2.getBlue()) * colorIntToFloat(c1.getBlue());
         return new Color(r, g, b);
     }
 

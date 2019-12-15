@@ -8,7 +8,7 @@ public class Lambertian extends Material {
 
     @Override
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) {
-        return new Ray(pos, Vec3.add(/*pos,*/ n, Utils.randomInUnitSphere()));
+        return new Ray(pos, Vec3.add(n, Utils.randomInUnitSphere()));
     }
 
     @Override

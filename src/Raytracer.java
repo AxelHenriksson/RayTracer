@@ -66,19 +66,19 @@ public class Raytracer extends JComponent {
 
         for(int col = 0; col<imageWidth;col++) {
             for (int row = 0; row < imageHeight; row++) {
-                double red = 0;
-                double green = 0;
-                double blue = 0;
+                float red = 0;
+                float green = 0;
+                float blue = 0;
                 for(int s = 0; s < samples; s++) {
                     double u = ((double) col + Math.random()) / imageWidth;
                     double v = ((double) row + Math.random()) / imageHeight;
                     Ray r = cam.getRay(u, v);
-                    Color sColor = colorDiffuse(r, 0);
+                    Color sColor = color(r, 0);
                     red += sColor.getRed()/255.0;
                     green += sColor.getGreen()/255.0;
                     blue += sColor.getBlue()/255.0;
                 }
-                Color color = new Color((float) red/samples, (float) green/samples, (float) blue/samples);
+                Color color = new Color( red/samples,  green/samples,  blue/samples);
                 color = Utils.correctGamma(color, gamma);
                 image[col][row] = color;
             }
@@ -86,10 +86,10 @@ public class Raytracer extends JComponent {
         repaint();
     }
 
-    private Color colorDiffuse(Ray r, int depth) {
+    private Color color(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
             if (depth < this.depth && hr != null) {
-                return Utils.multiply(colorDiffuse(hr.scattered, depth+1), hr.attenuation);
+                return Utils.multiply(color(hr.scattered, depth+1), hr.attenuation);
             }
         return getBackground(r);
     }
