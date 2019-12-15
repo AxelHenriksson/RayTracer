@@ -5,9 +5,10 @@ import java.awt.*;
 
 
 public class Toolbar extends JPanel {
+    private int width;
 
     public Toolbar(int width, Tool... tools) {
-        setPreferredSize(new Dimension(width, width));
+        this.width = width;
 
         for(Tool tool : tools) {
             addTool(tool);
@@ -15,6 +16,7 @@ public class Toolbar extends JPanel {
     }
 
     public void addTool(Tool tool) {
+        tool.setWidth(width);
         add(tool);
     }
 
@@ -28,5 +30,6 @@ public class Toolbar extends JPanel {
                 break;
         }
     }
+    public void setWidth(int width) { this.width = width; }
 
 }

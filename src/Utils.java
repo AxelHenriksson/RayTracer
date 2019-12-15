@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.*;
 
 public class Utils {
@@ -21,22 +22,32 @@ public class Utils {
         float r = colorIntToFloat(c2.getRed()) * colorIntToFloat(c1.getRed());
         float g = colorIntToFloat(c2.getGreen()) * colorIntToFloat(c1.getGreen());
         float b = colorIntToFloat(c2.getBlue()) * colorIntToFloat(c1.getBlue());
-        return new Color(r, g, b);
+        float a = colorIntToFloat(Math.max(c2.getAlpha(), c1.getAlpha()));
+        return new Color(r, g, b, a);
     }
 
     static Color multiply(Color color, double factor) {
-        int r = (int) (factor * color.getRed());
-        int g = (int) (factor * color.getGreen());
-        int b = (int) (factor * color.getBlue());
-        return new Color(r, g, b);
+        int r = clamp((int) (factor * color.getRed()), 0, 255);
+        int g = clamp((int) (factor * color.getGreen()), 0, 255);
+        int b = clamp((int) (factor * color.getBlue()), 0, 255);
+        int a = clamp((int) (factor * color.getAlpha()), 0, 255);
+        return new Color(r, g, b, a);
+    }
+
+    static Color setAlpha(Color color, float alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), 255*alpha);
     }
 
     static Color correctGamma(Color color, double gamma) {
         float r = (float) (Math.pow(color.getRed()/255.0, 1/gamma));
         float g = (float) (Math.pow(color.getGreen()/255.0, 1/gamma));
         float b = (float) (Math.pow(color.getBlue()/255.0, 1/gamma));
-        return new Color(r, g, b);
+        float a = color.getAlpha()/255.0f;
+        return new Color(r, g, b, a);
     }
+
+    static int clamp (int a, int min, int max) { return Math.max(min, Math.min(a, max)); }
+
 
     static Vec3 randomInUnitSphere() {
         Vec3 p;
