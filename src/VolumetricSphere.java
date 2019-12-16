@@ -1,3 +1,5 @@
+import java.awt.*;
+
 public class VolumetricSphere extends Hitable {
     private double radius;
     private Material mat;
@@ -20,15 +22,26 @@ public class VolumetricSphere extends Hitable {
         double c = Vec3.dot(oc, oc) - radius*radius;
         double discriminant = b*b - a*c;
 
-        if(discriminant > 0 && Math.random() < density) {
+        if(discriminant > 0) {
+            if(Math.random() < density) {
                 double tInObject = ((Math.random() * 2.0) - 1) * Math.sqrt(b * b - a * c) / a;
                 double t = (-b + tInObject);
                 if (t < t_max && t > t_min) {
                     Vec3 hitPos = r.pointAtParameter(t);
-                    Vec3 n = Vec3.divide(Vec3.subtract(hitPos, pos), radius);
+                    Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = mat.scatter(r, hitPos);
                     return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
                 }
+            } else {
+                double tInObject = ((Math.random() * 2.0) - 1) * Math.sqrt(b * b - a * c) / a;
+                double t = (-b + tInObject);
+                if (t < t_max && t > t_min) {
+                    Vec3 hitPos = r.pointAtParameter(t);
+                    Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
+                    Ray scatter = new Ray(hitPos, r.direction());
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+                }
+            }
         }
         return null;
     }

@@ -11,13 +11,15 @@ public class Toolbar extends JPanel {
         this.width = width;
 
         for(Tool tool : tools) {
-            addTool(tool);
+            addTools(tool);
         }
     }
 
-    public void addTool(Tool tool) {
-        tool.setWidth(width);
-        add(tool);
+    public void addTools(Tool... tools) {
+        for(Tool tool : tools) {
+            tool.setMaximumSize(new Dimension(width, width));
+            add(tool);
+        }
     }
 
     public void setAnchor(String anchor) {
@@ -30,6 +32,5 @@ public class Toolbar extends JPanel {
                 break;
         }
     }
-    public void setWidth(int width) { this.width = width; }
 
 }

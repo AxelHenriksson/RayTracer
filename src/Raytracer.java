@@ -6,19 +6,25 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.Format;
+import java.text.NumberFormat;
+
+//TODO: Implement bufferedImage and scaling of the image in the view
 
 public class Raytracer extends JComponent {
     private Color[][] image;
-    private int imageWidth, imageHeight, pixSize;
+    private int pixSize;
     private Environment env;
     private double t_min = 0.001;
     private double t_max = 1000.0;
     private int samples;
     private int depth;
     double gamma;
-    boolean transparentBackground = false;
+    boolean transparentBackground;
 
 
     final int MAX_FPS = 60;
@@ -26,13 +32,12 @@ public class Raytracer extends JComponent {
     Timer timer;
 
     private int progress;
+    private double renderTime;
 
     Raytracer(int width, int height, int pixSize) {
-        this.imageWidth = width / pixSize;
-        this.imageHeight = height / pixSize;
         this.pixSize = pixSize;
 
-        image = new Color[imageWidth][imageHeight];
+        image = new Color[width / pixSize][height / pixSize];
 
         setBackground(Color.MAGENTA);
         setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
@@ -43,16 +48,17 @@ public class Raytracer extends JComponent {
     void traceNormals() {
         Camera cam = env.activeCam;
         progress = 0;
+        long t0 = System.currentTimeMillis();
 
-        for(int col = 0; col<imageWidth;col++) {
-            for (int row = 0; row < imageHeight; row++) {
+        for(int col = 0; col<image.length;col++) {
+            for (int row = 0; row < image[col].length; row++) {
                 float red = 0;
                 float green = 0;
                 float blue = 0;
                 float alpha = 0;
                 for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / imageWidth;
-                    double v = ((double) row + Math.random()) / imageHeight;
+                    double u = ((double) col + Math.random()) / image.length;
+                    double v = ((double) row + Math.random()) / image[col].length;
                     Ray r = cam.getRay(u, v);
                     Color sColor = colorNormal(r);
                     red += sColor.getRed()/255.0;
@@ -63,10 +69,11 @@ public class Raytracer extends JComponent {
                 Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
                 image[col][row] = color;
             }
-            progress = (int)(100*((double)col/imageWidth));
+            progress = (int)(100*((double)col/image.length));
         }
         revalidate();
         repaint();
+        renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
     private Color colorNormal(Ray r) {
         HitResult hr = env.hit(r,  t_min, t_max);
@@ -80,16 +87,17 @@ public class Raytracer extends JComponent {
     void traceShaded() {
         Camera cam = env.activeCam;
         progress = 0;
+        long t0 = System.currentTimeMillis();
 
-        for(int col = 0; col<imageWidth;col++) {
-            for (int row = 0; row < imageHeight; row++) {
+        for(int col = 0; col<image.length;col++) {
+            for (int row = 0; row < image[col].length; row++) {
                 float red = 0;
                 float green = 0;
                 float blue = 0;
                 float alpha = 0;
                 for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / imageWidth;
-                    double v = ((double) row + Math.random()) / imageHeight;
+                    double u = ((double) col + Math.random()) / image.length;
+                    double v = ((double) row + Math.random()) / image[col].length;
                     Ray r = cam.getRay(u, v);
                     Color sColor = colorShaded(r, 0);
                     red += sColor.getRed()/255.0;
@@ -101,9 +109,11 @@ public class Raytracer extends JComponent {
                 color = Utils.correctGamma(color, gamma);
                 image[col][row] = color;
             }
-            progress = (int)(100*((double)col/imageWidth));
+            progress = (int)(100*((double)col/image.length));
         }
         repaint();
+
+        renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
     private Color colorShaded(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
@@ -123,9 +133,9 @@ public class Raytracer extends JComponent {
     }
 
     public void drawCoordImage() {
-        for(int col = 0; col<imageWidth;col++) {
-            for (int row = 0; row < imageHeight; row++) {
-                image[col][row] = new Color(col / (float)imageWidth, 1.0f-(row / (float)imageHeight), 0.0f);
+        for(int col = 0; col<image.length;col++) {
+            for (int row = 0; row < image[col].length; row++) {
+                image[col][row] = new Color(col / (float)image.length, 1.0f-(row / (float)image[col].length), 0.0f);
             }
         }
         repaint();
@@ -138,6 +148,7 @@ public class Raytracer extends JComponent {
     void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
 
     int getProgress() { return progress; }
+    double getRenderTime() { return renderTime; }
 
 
     public void saveImage(String path) {
@@ -154,7 +165,7 @@ public class Raytracer extends JComponent {
         try {
             ImageIO.write(bufferedImage, path.substring(path.lastIndexOf(".") + 1), outputFile);
         } catch (IOException e) {
-            System.out.println("Raytracer: saveImage() exception");
+            System.out.println("ERROR - Raytracer: saveImage() exception");
             e.printStackTrace();
         }
         JOptionPane.showMessageDialog(null, String.format("Saved to %s", path));
@@ -162,8 +173,8 @@ public class Raytracer extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
-        for(int col = 0; col < imageWidth; col++) {
-            for(int row = 0; row < imageHeight; row++) {
+        for(int col = 0; col < image.length; col++) {
+            for(int row = 0; row < image[col].length; row++) {
                 g.setColor(image[col][row]);
                 g.fillRect(col*pixSize, row*pixSize, pixSize, pixSize);
             }
@@ -200,30 +211,45 @@ public class Raytracer extends JComponent {
     // TOOLS ---------------------------
 
     public Toolbar toolbar() {
-        int size = 64;
-        return new Toolbar(size, traceNormalsTool(size), traceShadedTool(size), saveImageTool(size), toggleTransparentTool(size));
+        int size = 32;
+        return new Toolbar(size,
+                traceNormalsTool(size),
+                traceShadedTool(size),
+                saveImageTool(size),
+                toggleTransparentTool(size),
+                resolutionTool(size)
+        );
     }
 
     Tool saveImageTool(int iconSize) {
+        Tool tool = new Tool();
         JButton button;
+
         if(getClass().getResource(String.format("res/saveImage%d.png", iconSize)) != null) {
             button = new JButton(new ImageIcon(getClass().getResource(String.format("res/saveImage%d.png", iconSize))));
         } else {
-            button = new JButton("saveImageTool");
+            button = new JButton("saveImage");
             button.setFont(new Font("Dialog", Font.PLAIN, 10));
         }
 
+        button.setBackground(Color.white);
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        tool.add(button);
+
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                String path = JOptionPane.showInputDialog("Enter filename and extension.");
+                String path = JOptionPane.showInputDialog("Enter filename with extension.");
                 saveImage(path);
             }
         });
-        return new Tool(button);
+
+        return tool;
     }
 
     public Tool traceNormalsTool(int iconSize) {
+        Tool tool = new Tool();
         JButton button;
+
         if(getClass().getResource(String.format("res/traceNormals%d.png", iconSize)) != null) {
             button = new JButton(new ImageIcon(getClass().getResource(String.format("res/traceNormals%d.png", iconSize))));
         } else {
@@ -231,16 +257,23 @@ public class Raytracer extends JComponent {
             button.setFont(new Font("Dialog", Font.PLAIN, 10));
         }
 
+        button.setBackground(Color.white);
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        tool.add(button);
+
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 traceNormals();
             }
         });
-        return new Tool(button);
+
+        return tool;
     }
 
     public Tool traceShadedTool(int iconSize) {
+        Tool tool = new Tool();
         JButton button;
+
         if(getClass().getResource(String.format("res/traceShaded%d.png", iconSize)) != null) {
             button = new JButton(new ImageIcon(getClass().getResource(String.format("res/traceShaded%d.png", iconSize))));
         } else {
@@ -248,22 +281,33 @@ public class Raytracer extends JComponent {
             button.setFont(new Font("Dialog", Font.PLAIN, 10));
         }
 
+        button.setBackground(Color.white);
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        tool.add(button);
+
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 traceShaded();
             }
         });
-        return new Tool(button);
+
+        return tool;
     }
 
     public Tool toggleTransparentTool(int iconSize) {
-        JButton button;
+        Tool tool = new Tool();
+        JToggleButton button;
+
         if(getClass().getResource(String.format("res/toggleTransparent%d.png", iconSize)) != null) {
-            button = new JButton(new ImageIcon(getClass().getResource(String.format("res/toggleTransparent%d.png", iconSize))));
+            button = new JToggleButton(new ImageIcon(getClass().getResource(String.format("res/toggleTransparent%d.png", iconSize))));
         } else {
-            button = new JButton("toggleTransparent");
+            button = new JToggleButton("toggleTransparent", transparentBackground);
             button.setFont(new Font("Dialog", Font.PLAIN, 10));
         }
+
+        button.setBackground(Color.white);
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        tool.add(button);
 
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -271,7 +315,33 @@ public class Raytracer extends JComponent {
                 repaint();
             }
         });
-        return new Tool(button);
+        return tool;
+    }
+
+    public Tool resolutionTool(int iconSize) {
+        Format resFormat = NumberFormat.getIntegerInstance();
+        JFormattedTextField widthField = new JFormattedTextField(resFormat);
+        widthField.setValue(image.length);
+        widthField.setColumns(6);
+        widthField.addPropertyChangeListener("value", new PropertyChangeListener()
+        {public void propertyChange(PropertyChangeEvent evt) { image = new Color[Integer.parseInt(widthField.getText()) / pixSize][image[0].length / pixSize]; }
+        });
+
+        JFormattedTextField heightField = new JFormattedTextField(resFormat);
+        heightField.setValue(image[0].length);
+        heightField.setColumns(6);
+        heightField.addPropertyChangeListener("value", new PropertyChangeListener()
+        {public void propertyChange(PropertyChangeEvent evt) { image = new Color[image.length / pixSize][Integer.parseInt(heightField.getText()) / pixSize]; }
+        });
+
+
+        Tool tool = new Tool();
+        tool.setLayout(new GridLayout(2, 1));
+        tool.add(widthField);
+        tool.add(heightField);
+        tool.setPreferredSize(new Dimension(iconSize, iconSize));
+
+        return tool;
     }
 
 }
