@@ -8,8 +8,6 @@ public class Sphere extends Hitable {
         this.mat = material;
     }
 
-    public double getRadius() { return radius; }
-
     @Override
     HitResult hit(Ray r, double t_min, double t_max) {
         Vec3 oc = Vec3.subtract(r.origin(), pos);
