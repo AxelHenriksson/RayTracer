@@ -22,19 +22,16 @@ public class VolumetricSphere extends Hitable {
         double c = Vec3.dot(oc, oc) - radius*radius;
         double discriminant = b*b - a*c;
 
+        //TODO: Fix discrepancies in below code
         if(discriminant > 0) {
-            if(Math.random() < density) {
-                double tInObject = ((Math.random() * 2.0) - 1) * Math.sqrt(b * b - a * c) / a;
+                double tInObject = ((Math.random() * 2.0) - 1) * (Math.sqrt(b * b - a * c) / a);
                 double t = (-b + tInObject);
-                if (t < t_max && t > t_min) {
+                if (t < t_max && t > t_min && Math.random() < density) {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = mat.scatter(r, hitPos);
                     return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
-                }
-            } else {
-                double tInObject = ((Math.random() * 2.0) - 1) * Math.sqrt(b * b - a * c) / a;
-                double t = (-b + tInObject);
+                } else {
                 if (t < t_max && t > t_min) {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();

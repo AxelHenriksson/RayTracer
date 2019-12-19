@@ -40,7 +40,7 @@ public class Raytracer extends JComponent {
         image = new Color[width / pixSize][height / pixSize];
 
         setBackground(Color.MAGENTA);
-        setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
+        //setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
     }
 
 
@@ -173,10 +173,12 @@ public class Raytracer extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
+        int pixWidth = this.getRootPane().getWidth()/image.length;
+        int pixHeight = this.getRootPane().getHeight()/image[0].length;
         for(int col = 0; col < image.length; col++) {
             for(int row = 0; row < image[col].length; row++) {
                 g.setColor(image[col][row]);
-                g.fillRect(col*pixSize, row*pixSize, pixSize, pixSize);
+                g.fillRect(col*pixWidth, row*pixHeight, pixWidth, pixHeight);
             }
         }
     }
@@ -324,14 +326,22 @@ public class Raytracer extends JComponent {
         widthField.setValue(image.length);
         widthField.setColumns(6);
         widthField.addPropertyChangeListener("value", new PropertyChangeListener()
-        {public void propertyChange(PropertyChangeEvent evt) { image = new Color[Integer.parseInt(widthField.getText()) / pixSize][image[0].length / pixSize]; }
+        {public void propertyChange(PropertyChangeEvent evt) {
+            image = new Color[Integer.parseInt(widthField.getText())][image[0].length];
+            System.out.println(image.length * pixSize + " " + image[0].length * pixSize);
+            //setPreferredSize(new Dimension(image.length * pixSize, image[0].length * pixSize));
+            }
         });
 
         JFormattedTextField heightField = new JFormattedTextField(resFormat);
         heightField.setValue(image[0].length);
         heightField.setColumns(6);
         heightField.addPropertyChangeListener("value", new PropertyChangeListener()
-        {public void propertyChange(PropertyChangeEvent evt) { image = new Color[image.length / pixSize][Integer.parseInt(heightField.getText()) / pixSize]; }
+        {public void propertyChange(PropertyChangeEvent evt) {
+            image = new Color[image.length][Integer.parseInt(heightField.getText())];
+            System.out.println(image.length * pixSize + " " + image[0].length * pixSize);
+            //setPreferredSize(new Dimension(image.length * pixSize, image[0].length * pixSize));
+        }
         });
 
 

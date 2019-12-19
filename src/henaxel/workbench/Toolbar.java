@@ -17,7 +17,6 @@ public class Toolbar extends JPanel {
 
     public void addTools(Tool... tools) {
         for(Tool tool : tools) {
-            tool.setMaximumSize(new Dimension(width, width));
             add(tool);
         }
     }
