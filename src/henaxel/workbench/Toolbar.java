@@ -9,6 +9,7 @@ public class Toolbar extends JPanel {
 
     public Toolbar(int width, Tool... tools) {
         this.width = width;
+        setBackground(new Color( 0, 0, 0, 0));
 
         for(Tool tool : tools) {
             addTools(tool);

@@ -16,8 +16,9 @@ import java.text.NumberFormat;
 //TODO: Implement bufferedImage and scaling of the image in the view
 
 public class Raytracer extends JComponent {
-    private Color[][] image;
-    private int pixSize;
+    private BufferedImage image;
+    private int imageWidth = 128;
+    private int imageHeight = 128;
     private Environment env;
     private double t_min = 0.001;
     private double t_max = 1000.0;
@@ -34,31 +35,28 @@ public class Raytracer extends JComponent {
     private int progress;
     private double renderTime;
 
-    Raytracer(int width, int height, int pixSize) {
-        this.pixSize = pixSize;
-
-        image = new Color[width / pixSize][height / pixSize];
-
+    Raytracer() {
         setBackground(Color.MAGENTA);
-        //setPreferredSize(new Dimension(width-(width%pixSize), height-(height%pixSize)));
     }
 
 
 
     void traceNormals() {
         Camera cam = env.activeCam;
+        cam.updateVectors(imageWidth, imageHeight);
         progress = 0;
         long t0 = System.currentTimeMillis();
+        image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        for(int col = 0; col<image.length;col++) {
-            for (int row = 0; row < image[col].length; row++) {
+        for(int col = 0; col<imageWidth;col++) {
+            for (int row = 0; row < imageHeight; row++) {
                 float red = 0;
                 float green = 0;
                 float blue = 0;
                 float alpha = 0;
                 for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / image.length;
-                    double v = ((double) row + Math.random()) / image[col].length;
+                    double u = ((double) col + Math.random()) / imageWidth;
+                    double v = ((double) row + Math.random()) / imageHeight;
                     Ray r = cam.getRay(u, v);
                     Color sColor = colorNormal(r);
                     red += sColor.getRed()/255.0;
@@ -67,9 +65,10 @@ public class Raytracer extends JComponent {
                     alpha += sColor.getAlpha()/255.0;
                 }
                 Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
-                image[col][row] = color;
+                image.setRGB(col, row, color.getRGB());
             }
-            progress = (int)(100*((double)col/image.length));
+            progress = (int)(100*((double)col/imageWidth));
+            System.out.println(progress);
         }
         revalidate();
         repaint();
@@ -86,18 +85,20 @@ public class Raytracer extends JComponent {
 
     void traceShaded() {
         Camera cam = env.activeCam;
+        cam.updateVectors(imageWidth, imageHeight);
         progress = 0;
         long t0 = System.currentTimeMillis();
+        image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        for(int col = 0; col<image.length;col++) {
-            for (int row = 0; row < image[col].length; row++) {
+        for(int col = 0; col<imageWidth;col++) {
+            for (int row = 0; row < imageHeight; row++) {
                 float red = 0;
                 float green = 0;
                 float blue = 0;
                 float alpha = 0;
                 for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / image.length;
-                    double v = ((double) row + Math.random()) / image[col].length;
+                    double u = ((double) col + Math.random()) / imageWidth;
+                    double v = ((double) row + Math.random()) / imageHeight;
                     Ray r = cam.getRay(u, v);
                     Color sColor = colorShaded(r, 0);
                     red += sColor.getRed()/255.0;
@@ -107,9 +108,10 @@ public class Raytracer extends JComponent {
                 }
                 Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
                 color = Utils.correctGamma(color, gamma);
-                image[col][row] = color;
+                image.setRGB(col, row, color.getRGB());
             }
-            progress = (int)(100*((double)col/image.length));
+            progress = (int)(100*((double)col/imageWidth));
+            System.out.println(progress);
         }
         repaint();
 
@@ -133,9 +135,9 @@ public class Raytracer extends JComponent {
     }
 
     public void drawCoordImage() {
-        for(int col = 0; col<image.length;col++) {
-            for (int row = 0; row < image[col].length; row++) {
-                image[col][row] = new Color(col / (float)image.length, 1.0f-(row / (float)image[col].length), 0.0f);
+        for(int col = 0; col<imageWidth;col++) {
+            for (int row = 0; row < imageHeight; row++) {
+                image.setRGB(col, row, new Color(col / (float)imageWidth, 1.0f-(row / (float)imageHeight), 0.0f).getRGB());
             }
         }
         repaint();
@@ -152,12 +154,12 @@ public class Raytracer extends JComponent {
 
 
     public void saveImage(String path) {
-        BufferedImage bufferedImage = new BufferedImage(image.length, image[0].length,
+        BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight,
                 BufferedImage.TYPE_INT_ARGB);
 
-        for (int x = 0; x < image.length; x++) {
-            for (int y = 0; y < image[x].length; y++) {
-                bufferedImage.setRGB(x, y, image[x][y].getRGB());
+        for (int x = 0; x < imageWidth; x++) {
+            for (int y = 0; y < imageHeight; y++) {
+                bufferedImage.setRGB(x, y, image.getRGB(x, y));
             }
         }
 
@@ -173,14 +175,7 @@ public class Raytracer extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
-        int pixWidth = this.getRootPane().getWidth()/image.length;
-        int pixHeight = this.getRootPane().getHeight()/image[0].length;
-        for(int col = 0; col < image.length; col++) {
-            for(int row = 0; row < image[col].length; row++) {
-                g.setColor(image[col][row]);
-                g.fillRect(col*pixWidth, row*pixHeight, pixWidth, pixHeight);
-            }
-        }
+        g.drawImage(image, 0, 0, Math.min(this.getWidth(), (imageWidth/imageHeight)*this.getHeight()), Math.min(this.getHeight(), (imageHeight/imageWidth)*this.getWidth()), null);
     }
 
 
@@ -219,7 +214,8 @@ public class Raytracer extends JComponent {
                 traceShadedTool(size),
                 saveImageTool(size),
                 toggleTransparentTool(size),
-                resolutionTool(size)
+                resolutionTool(size),
+                sampleTool(size)
         );
     }
 
@@ -323,33 +319,55 @@ public class Raytracer extends JComponent {
     public Tool resolutionTool(int iconSize) {
         Format resFormat = NumberFormat.getIntegerInstance();
         JFormattedTextField widthField = new JFormattedTextField(resFormat);
-        widthField.setValue(image.length);
+        widthField.setValue(imageWidth);
         widthField.setColumns(6);
         widthField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
-            image = new Color[Integer.parseInt(widthField.getText())][image[0].length];
-            System.out.println(image.length * pixSize + " " + image[0].length * pixSize);
-            //setPreferredSize(new Dimension(image.length * pixSize, image[0].length * pixSize));
+            imageWidth = Integer.parseInt(widthField.getText());
             }
         });
 
         JFormattedTextField heightField = new JFormattedTextField(resFormat);
-        heightField.setValue(image[0].length);
+        heightField.setValue(imageHeight);
         heightField.setColumns(6);
         heightField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
-            image = new Color[image.length][Integer.parseInt(heightField.getText())];
-            System.out.println(image.length * pixSize + " " + image[0].length * pixSize);
-            //setPreferredSize(new Dimension(image.length * pixSize, image[0].length * pixSize));
+            imageHeight = Integer.parseInt(heightField.getText());
         }
         });
-
 
         Tool tool = new Tool();
         tool.setLayout(new GridLayout(2, 1));
         tool.add(widthField);
         tool.add(heightField);
-        tool.setPreferredSize(new Dimension(iconSize, iconSize));
+
+        return tool;
+    }
+
+    public Tool sampleTool(int iconSize) {
+        Format sampleFormat = NumberFormat.getIntegerInstance();
+        JFormattedTextField sampleField = new JFormattedTextField(sampleFormat);
+        sampleField.setValue(samples);
+        sampleField.setColumns(6);
+        sampleField.addPropertyChangeListener("value", new PropertyChangeListener()
+        {public void propertyChange(PropertyChangeEvent evt) {
+            samples = Integer.parseInt(sampleField.getText());
+        }
+        });
+
+        JFormattedTextField depthField = new JFormattedTextField(sampleFormat);
+        depthField.setValue(depth);
+        depthField.setColumns(6);
+        depthField.addPropertyChangeListener("value", new PropertyChangeListener()
+        {public void propertyChange(PropertyChangeEvent evt) {
+            depth = Integer.parseInt(depthField.getText());
+        }
+        });
+
+        Tool tool = new Tool();
+        tool.setLayout(new GridLayout(2, 1));
+        tool.add(sampleField);
+        tool.add(depthField);
 
         return tool;
     }
