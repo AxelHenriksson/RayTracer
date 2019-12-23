@@ -11,8 +11,17 @@ public class Camera {
         updateVectors(imageWidth, imageHeight);
     }
 
+    Camera(double viewPlaneWidth) {
+        this.viewPlaneWidth = viewPlaneWidth;
+    }
+
+    Camera() {
+        this(Defaults.VIEWPLANEWIDTH);
+    }
+
     void updateVectors(int imageWidth, int imageHeight) {
         double viewPlaneHeight = viewPlaneWidth*((double) imageHeight/imageWidth);
+        System.out.println(upperLeft + " " + horizontal + " " + vertical + " " + origin);
         upperLeft = new Vec3(-viewPlaneWidth/2.0, viewPlaneHeight/2.0, -1.0);
         horizontal = new Vec3(viewPlaneWidth, 0.0, 0.0);
         vertical = new Vec3(0.0, -viewPlaneHeight, 0.0);
@@ -21,6 +30,10 @@ public class Camera {
 
     Ray getRay(double u, double v) {
         return new Ray(origin, Vec3.add(upperLeft, Vec3.multiply(horizontal, u), Vec3.multiply(vertical, v)));
+    }
+
+    void setViewPlaneWidth(double viewPlaneWidth) {
+        this.viewPlaneWidth = viewPlaneWidth;
     }
 
     Vec3 getUpperLeft() { return upperLeft; }

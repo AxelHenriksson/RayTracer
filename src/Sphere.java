@@ -22,18 +22,14 @@ public class Sphere extends Hitable {
                 Vec3 hitPos = r.pointAtParameter(t);
                 Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                 Ray scatter = mat.scatter(r, hitPos, n);
-                if(scatter != null) {
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
-                }
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
             }
             t = (-b + Math.sqrt(b*b-a*c))/a;
             if (t < t_max && t > t_min) {
                 Vec3 hitPos = r.pointAtParameter(t);
                 Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                 Ray scatter = mat.scatter(r, hitPos, n);
-                if(scatter != null) {
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
-                }
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
             }
 
         }

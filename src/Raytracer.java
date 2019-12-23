@@ -13,26 +13,23 @@ import java.io.IOException;
 import java.text.Format;
 import java.text.NumberFormat;
 
-//TODO: Implement bufferedImage and scaling of the image in the view
 
 public class Raytracer extends JComponent {
     private BufferedImage image;
-    private int imageWidth = 128;
-    private int imageHeight = 128;
     private Environment env;
-    private double t_min = 0.001;
-    private double t_max = 1000.0;
-    private int samples;
-    private int depth;
-    double gamma;
-    boolean transparentBackground;
+    private int imageWidth = Defaults.IMAGE_WIDTH;
+    private int imageHeight = Defaults.IMAGE_HEIGHT;
+    private double t_min = Defaults.CLIP_MIN;
+    private double t_max = Defaults.CLIP_MAX;
+    private int samples = Defaults.SAMPLES;
+    private int depth = Defaults.DEPTH;
+    double gamma = Defaults.GAMMA;
+    boolean transparentBackground = Defaults.TRANSPARENT;
 
-
-    final int MAX_FPS = 60;
     double fps;
     Timer timer;
 
-    private int progress;
+    private double progress;
     private double renderTime;
 
     Raytracer() {
@@ -67,8 +64,11 @@ public class Raytracer extends JComponent {
                 Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
                 image.setRGB(col, row, color.getRGB());
             }
-            progress = (int)(100*((double)col/imageWidth));
-            System.out.println(progress);
+            //TODO: Implement proper progress tracking as tool
+            progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
+            long time = System.currentTimeMillis();
+            double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
+            System.out.printf("Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
         }
         revalidate();
         repaint();
@@ -110,19 +110,23 @@ public class Raytracer extends JComponent {
                 color = Utils.correctGamma(color, gamma);
                 image.setRGB(col, row, color.getRGB());
             }
-            progress = (int)(100*((double)col/imageWidth));
-            System.out.println(progress);
+            //TODO: Implement proper progress tracking as tool
+            progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
+            long time = System.currentTimeMillis();
+            double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
+            System.out.printf("Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
         }
         repaint();
 
         renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
+    //TODO: check below code
     private Color colorShaded(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
-        if (depth < this.depth && hr != null) {
-            return Utils.multiply(colorShaded(hr.scattered, depth+1), hr.attenuation);
-        }
-        return getBackground(r);
+        if (hr == null) { return getBackground(r); }
+        if (depth >= this.depth || hr.scattered == null) { return hr.attenuation; }
+
+        return Utils.multiply(colorShaded(hr.scattered, depth+1), hr.attenuation);
     }
 
     private Color getBackground(Ray r) {
@@ -149,7 +153,7 @@ public class Raytracer extends JComponent {
     void setEnvironment(Environment env) { this.env = env; }
     void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
 
-    int getProgress() { return progress; }
+    double getProgress() { return progress; }
     double getRenderTime() { return renderTime; }
 
 
@@ -170,12 +174,12 @@ public class Raytracer extends JComponent {
             System.out.println("ERROR - Raytracer: saveImage() exception");
             e.printStackTrace();
         }
-        JOptionPane.showMessageDialog(null, String.format("Saved to %s", path));
+        JOptionPane.showMessageDialog(null, String.format("Saved as %s", path));
     }
 
     @Override
     public void paintComponent(Graphics g) {
-        g.drawImage(image, 0, 0, Math.min(this.getWidth(), (imageWidth/imageHeight)*this.getHeight()), Math.min(this.getHeight(), (imageHeight/imageWidth)*this.getWidth()), null);
+        g.drawImage(image, 0, 0, Math.min(this.getWidth(), (int)(((double)imageWidth/imageHeight)*this.getHeight())), Math.min(this.getHeight(), (int)(((double)imageHeight/imageWidth)*this.getWidth())), null);
     }
 
 
@@ -196,7 +200,7 @@ public class Raytracer extends JComponent {
     @Override
     public void actionPerformed(ActionEvent e) {
             try {
-                Thread.sleep((long) Math.max(0, (1.0 / MAX_FPS) * 1000 - (System.currentTimeMillis() - lastMS)));
+                Thread.sleep((long) Math.max(0, (1.0 / Defaults.MAX_FPS) * 1000 - (System.currentTimeMillis() - lastMS)));
             } catch (InterruptedException exc) { exc.printStackTrace(); }
         deltaMS = System.currentTimeMillis()-lastMS;
             fps = (1.0/deltaMS)/1000.0;
@@ -210,9 +214,9 @@ public class Raytracer extends JComponent {
     public Toolbar toolbar() {
         int size = 32;
         return new Toolbar(size,
+                saveImageTool(size),
                 traceNormalsTool(size),
                 traceShadedTool(size),
-                saveImageTool(size),
                 toggleTransparentTool(size),
                 resolutionTool(size),
                 sampleTool(size)
@@ -231,12 +235,14 @@ public class Raytracer extends JComponent {
         }
 
         button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
         tool.add(button);
+        tool.setBackground(new Color(100, 137, 143));
 
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 String path = JOptionPane.showInputDialog("Enter filename with extension.");
+                if (path == null) return;
                 saveImage(path);
             }
         });
@@ -256,8 +262,9 @@ public class Raytracer extends JComponent {
         }
 
         button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
         tool.add(button);
+        tool.setBackground(new Color(98, 143, 92));
 
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -280,8 +287,9 @@ public class Raytracer extends JComponent {
         }
 
         button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
         tool.add(button);
+        tool.setBackground(new Color(98, 143, 92));
 
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -304,8 +312,9 @@ public class Raytracer extends JComponent {
         }
 
         button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 2));
+        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
         tool.add(button);
+        tool.setBackground(new Color(98, 143, 92));
 
         button.addActionListener(new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -340,6 +349,7 @@ public class Raytracer extends JComponent {
         tool.setLayout(new GridLayout(2, 1));
         tool.add(widthField);
         tool.add(heightField);
+        tool.setBackground(new Color(87, 87, 87));
 
         return tool;
     }
@@ -368,6 +378,7 @@ public class Raytracer extends JComponent {
         tool.setLayout(new GridLayout(2, 1));
         tool.add(sampleField);
         tool.add(depthField);
+        tool.setBackground(new Color(87, 87, 87));
 
         return tool;
     }
