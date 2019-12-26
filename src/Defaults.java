@@ -1,8 +1,8 @@
 class Defaults {
-    static final int IMAGE_WIDTH = 512;
-    static final int IMAGE_HEIGHT = 256;
-    static final int SAMPLES = 32;
-    static final int DEPTH = 8;
+    static final int IMAGE_WIDTH = 128;
+    static final int IMAGE_HEIGHT = 128;
+    static final int SAMPLES = 8;
+    static final int DEPTH = 4;
     static final double CLIP_MAX = 1000;
     static final double CLIP_MIN = 0.001;
     static final double GAMMA = 2;
