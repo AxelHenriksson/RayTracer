@@ -19,4 +19,7 @@ public abstract class Surface {
 
     abstract HitResult hit(Ray r, double t_min, double t_max);
 
+    public void setLookAt(Vec3 lookAt) {
+        this.lookAt = lookAt;
+    }
 }

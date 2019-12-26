@@ -10,7 +10,8 @@ public class Main {
         BufferedImage testTex = ImageReader.loadBufferedImage("src/res/earthx5400x2700.jpg");
 
         Environment env = new Environment();
-        env.add(new Sphere(new Vec3(0, 0, -1), new Vec3(0, 1, 0), new Vec3(1, 1, 0), 0.5, new Lambertian(testTex))); //new Lambertian(new Color(0.8f, 0.3f, 0.3f, 1.0f))
+        Surface earth = new Sphere(new Vec3(0, 0, -1), new Vec3(0, 1, 0), new Vec3(1, 0, 0), 0.5, new Lambertian(testTex));
+        env.add(earth);
         //env.add(new Sphere(new Vec3(0, 0, -1), 0.5, new Lambertian(new Color(0.8f, 0.3f, 0.3f, 1.0f))));
         //env.add(new Sphere(new Vec3(0.2, 0, -0.4), 0, new Dielectric(new Color(1f, 1f, 1f), 1.3)));
         //env.add(new Sphere(new Vec3(0, -100.5, -1), 100, new Lambertian(new Color(0.8f, 0.8f, 0.0f))));
@@ -21,7 +22,7 @@ public class Main {
 
         Raytracer rt = new Raytracer();
         rt.setEnvironment(env);
-        rt.traceLoop();
+        rt.traceLoop(earth);
 
         Workbench wb = new Workbench(rt);
         wb.addToolbar(BorderLayout.EAST, rt.toolbar());

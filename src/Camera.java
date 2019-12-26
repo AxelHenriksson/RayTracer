@@ -21,7 +21,6 @@ public class Camera {
 
     void updateVectors(int imageWidth, int imageHeight) {
         double viewPlaneHeight = viewPlaneWidth*((double) imageHeight/imageWidth);
-        System.out.println(upperLeft + " " + horizontal + " " + vertical + " " + origin);
         upperLeft = new Vec3(-viewPlaneWidth/2.0, viewPlaneHeight/2.0, -1.0);
         horizontal = new Vec3(viewPlaneWidth, 0.0, 0.0);
         vertical = new Vec3(0.0, -viewPlaneHeight, 0.0);
