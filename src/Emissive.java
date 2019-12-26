@@ -1,9 +1,13 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Emissive extends Material {
 
     Emissive(Color color) {
         super(color);
+    }
+    Emissive(BufferedImage texture) {
+        super(texture);
     }
 
     @Override

@@ -1,22 +1,33 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public abstract class Material {
     private Color albedo;
+    BufferedImage texture;
 
     Material(Color albedo) {
         this.albedo = albedo;
     }
+    Material(BufferedImage texture) { this.texture = texture; }
 
     // Surface scattering
-    public abstract Ray scatter(Ray r, Vec3 pos, Vec3 n);
+    public Ray scatter(Ray r, Vec3 pos, Vec3 n) { return null; }
     // Volumetric scattering
-    public abstract Ray scatter(Ray r, Vec3 pos);
+    public Ray scatter(Ray r, Vec3 pos) { return null; }
 
-    Color getAlbedo() { return albedo; }
+    Color getAlbedo(double u, double v) {
+        if(texture == null) {
+            return albedo;
+        } else {
+            int x = (int) (u * texture.getWidth());
+            int y = (int) (v * texture.getHeight());
+            return new Color(texture.getRGB(x, y));
+        }
+    }
 
     static Vec3 reflect(Vec3 v, Vec3 n) {
         Vec3 uv = v.unitVector();
-        return Vec3.subtract(uv, Vec3.multiply(Vec3.multiply(n, Vec3.dot(uv, n)), 2));
+        return Vec3.subtract(uv, Vec3.multiply(Vec3.multiply(n, Vec3.dot(uv, n)), 2)).unitVector();
     }
 
     static double schlick(double cosine, double refIndex) {

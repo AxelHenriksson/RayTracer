@@ -1,10 +1,15 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Metal extends Material {
     private double roughness;
 
     Metal(Color albedo, double roughness) {
         super(albedo);
+        this.roughness = Utils.clamp(roughness, 0, 1);
+    }
+    Metal(BufferedImage texture, double roughness) {
+        super(texture);
         this.roughness = Utils.clamp(roughness, 0, 1);
     }
 

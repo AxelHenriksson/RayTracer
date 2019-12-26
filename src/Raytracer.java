@@ -23,8 +23,8 @@ public class Raytracer extends JComponent {
     private double t_max = Defaults.CLIP_MAX;
     private int samples = Defaults.SAMPLES;
     private int depth = Defaults.DEPTH;
-    double gamma = Defaults.GAMMA;
-    boolean transparentBackground = Defaults.TRANSPARENT;
+    private double gamma = Defaults.GAMMA;
+    private boolean transparentBackground = Defaults.TRANSPARENT;
 
     double fps;
     Timer timer;
@@ -68,7 +68,7 @@ public class Raytracer extends JComponent {
             progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            System.out.printf("Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
+            System.out.printf("Rendering | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
         }
         revalidate();
         repaint();
@@ -114,7 +114,7 @@ public class Raytracer extends JComponent {
             progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            System.out.printf("Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
+            System.out.printf("Rendering | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60);
         }
         repaint();
 
@@ -158,8 +158,19 @@ public class Raytracer extends JComponent {
 
 
     public void saveImage(String path) {
-        BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight,
-                BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bufferedImage;
+        switch(path.substring(path.lastIndexOf(".") + 1).toLowerCase()) {
+            case "png" :
+                bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+                break;
+            case "jpg" :
+                bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
+                break;
+            default :
+                bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+                break;
+        }
+
 
         for (int x = 0; x < imageWidth; x++) {
             for (int y = 0; y < imageHeight; y++) {
@@ -243,7 +254,7 @@ public class Raytracer extends JComponent {
             public void actionPerformed(ActionEvent e) {
                 String path = JOptionPane.showInputDialog("Enter filename with extension.");
                 if (path == null) return;
-                saveImage(path);
+                saveImage("src/out/" + path);
             }
         });
 

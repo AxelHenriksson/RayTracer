@@ -1,18 +1,12 @@
 import java.awt.*;
 
-public class VolumetricSphere extends Hitable {
-    private double radius;
-    private Material mat;
+public class VolumetricSphere extends Sphere {
     private double density;
 
-    VolumetricSphere(Vec3 pos, double radius, Material material, double density) {
-        super(pos);
-        this.radius = radius;
-        this.mat = material;
+    VolumetricSphere(Vec3 pos, Vec3 rot, double radius, Material material, double density) {
+        super(pos, rot, radius, material);
         this.density = density;
     }
-
-    public double getRadius() { return radius; }
 
     @Override
     HitResult hit(Ray r, double t_min, double t_max) {
@@ -30,13 +24,13 @@ public class VolumetricSphere extends Hitable {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = mat.scatter(r, hitPos);
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0));
                 } else {
                 if (t < t_max && t > t_min) {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = new Ray(hitPos, r.direction());
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0));
                 }
             }
         }

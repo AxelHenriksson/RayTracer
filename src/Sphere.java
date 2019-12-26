@@ -1,11 +1,13 @@
 public class Sphere extends Hitable {
-    private double radius;
-    private Material mat;
+    double radius;
+
+    Sphere(Vec3 pos, Vec3 rot, double radius, Material material) {
+        super(pos, rot.unitVector(), material);
+        this.radius = radius;
+    }
 
     Sphere(Vec3 pos, double radius, Material material) {
-        super(pos);
-        this.radius = radius;
-        this.mat = material;
+        this(pos, new Vec3(0, 0, 0), radius, material);
     }
 
     @Override
@@ -22,14 +24,23 @@ public class Sphere extends Hitable {
                 Vec3 hitPos = r.pointAtParameter(t);
                 Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                 Ray scatter = mat.scatter(r, hitPos, n);
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+
+                Vec3 hitVec = Vec3.subtract(hitPos, pos).unitVector();
+                double u = Math.acos(Vec3.dot(rot, hitVec))/Math.PI;
+                double v = 1.0 - (Vec3.subtract(hitPos, pos).unitVector().y/2)-0.5;
+
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(u, v));
             }
             t = (-b + Math.sqrt(b*b-a*c))/a;
             if (t < t_max && t > t_min) {
                 Vec3 hitPos = r.pointAtParameter(t);
                 Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                 Ray scatter = mat.scatter(r, hitPos, n);
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+
+                double u = 0;
+                double v = (Vec3.subtract(hitPos, pos).unitVector().y/2)+0.5;
+
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(u, v));
             }
 
         }
