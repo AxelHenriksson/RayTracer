@@ -1,35 +1,31 @@
 import henaxel.workbench.*;
 
-import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Main {
 
     public static void main(String[] args) {
-        final double ASPECT_RATIO = 1.6/1.0;
-        final int HEIGHT = 720;
+
+        BufferedImage testTex = ImageReader.loadBufferedImage("src/res/earthx5400x2700.jpg");
 
         Environment env = new Environment();
-        env.add(new Sphere(new Vec3(0, 0, -1), 0.5, new Lambertian(new Color(0.8f, 0.3f, 0.3f, 1.0f))));
-        env.add(new Sphere(new Vec3(0, -100.5, -1), 100, new Lambertian(new Color(0.8f, 0.8f, 0.0f))));
-        env.add(new Sphere(new Vec3(1, 0, -1), 0.5, new Metal(new Color(0.8f, 0.6f, 0.2f))));
-        env.add(new Sphere(new Vec3(-1, 0, -1), 0.5, new Metal(new Color(0.8f, 0.8f, 0.8f))));
-        env.activeCam = new Camera((int)(HEIGHT*ASPECT_RATIO), HEIGHT, 4.0);
+        Surface earth = new Sphere(new Vec3(0, 0, -1), new Vec3(0, 1, 0), new Vec3(1, 0, 0), 0.5, new Lambertian(testTex));
+        env.add(earth);
+        //env.add(new Sphere(new Vec3(0, 0, -1), 0.5, new Lambertian(new Color(0.8f, 0.3f, 0.3f, 1.0f))));
+        //env.add(new Sphere(new Vec3(0.2, 0, -0.4), 0, new Dielectric(new Color(1f, 1f, 1f), 1.3)));
+        //env.add(new Sphere(new Vec3(0, -100.5, -1), 100, new Lambertian(new Color(0.8f, 0.8f, 0.0f))));
+        //env.add(new Sphere(new Vec3(1, 0, -1), 0.5, new Metal(new Color(0.8f, 0.6f, 0.2f), 0.3)));
+        //env.add(new Sphere(new Vec3(-1, 0, -1), 0.5, new Dielectric(1.0)));
+        //env.add(new Sphere(new Vec3(-1, 0, -1), -0.45, new Dielectric(1.0)));
+        env.activeCam = new Camera(1.2);
 
-        Raytracer rt = new Raytracer((int)(HEIGHT*ASPECT_RATIO), HEIGHT, 1);
-        rt.setSamples(16);
-        rt.setDepth(3);
-        rt.gamma = 2.0;
-        rt.setClipDist(0.01, 1000.0);
+        Raytracer rt = new Raytracer();
         rt.setEnvironment(env);
-
-        rt.transparentBackground = true;
-        rt.traceShaded();
+        rt.traceLoop(earth);
 
         Workbench wb = new Workbench(rt);
-
-        Toolbar testTB = new Toolbar(64, new Tool(new JButton("Test")), new Tool(new JButton("Test2")));
-        wb.addToolbar(BorderLayout.SOUTH, rt.toolbar());
+        wb.addToolbar(BorderLayout.EAST, rt.toolbar());
 
 
 

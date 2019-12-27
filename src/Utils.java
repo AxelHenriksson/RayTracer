@@ -47,6 +47,7 @@ public class Utils {
     }
 
     static int clamp (int a, int min, int max) { return Math.max(min, Math.min(a, max)); }
+    static double clamp (double a, double min, double max) { return Math.max(min, Math.min(a, max)); }
 
 
     static Vec3 randomInUnitSphere() {

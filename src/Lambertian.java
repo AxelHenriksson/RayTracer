@@ -1,9 +1,13 @@
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Lambertian extends Material {
 
     Lambertian(Color albedo) {
         super(albedo);
+    }
+    Lambertian(BufferedImage texture) {
+        super(texture);
     }
 
     @Override

@@ -10,9 +10,9 @@ public class Workbench extends JFrame {
         getContentPane().add(view, BorderLayout.CENTER);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        pack();
-        setVisible(true);
         setResizable(true);
+        setExtendedState(MAXIMIZED_BOTH);
+        setVisible(true);
     }
 
     public void addToolbar(String anchor, Toolbar toolbar) {
