@@ -40,7 +40,7 @@ public class Raytracer extends JComponent {
 
     void traceNormals(boolean logProgress) {
         Camera cam = env.activeCam;
-        cam.updateVectors(imageWidth, imageHeight);
+        cam.setAspectRatio((double)imageWidth/imageHeight);
         progress = 0;
         long t0 = System.currentTimeMillis();
         image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
@@ -69,6 +69,7 @@ public class Raytracer extends JComponent {
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
             if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60); }
+            
         }
         revalidate();
         repaint();
@@ -85,7 +86,7 @@ public class Raytracer extends JComponent {
 
     void traceShaded(boolean logProgress) {
         Camera cam = env.activeCam;
-        cam.updateVectors(imageWidth, imageHeight);
+        cam.setAspectRatio((double)imageWidth/imageHeight);
         progress = 0;
         long t0 = System.currentTimeMillis();
         image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
@@ -115,6 +116,7 @@ public class Raytracer extends JComponent {
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
             if(logProgress) { System.out.printf("Rendering Shaded | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60); }
+            repaint();
         }
         repaint();
 
@@ -195,8 +197,8 @@ public class Raytracer extends JComponent {
 
 
 
-    public void traceLoop(Surface spinningSurface) {
-        TraceLoop loop = new TraceLoop(spinningSurface);
+    public void traceLoop() {
+        TraceLoop loop = new TraceLoop();
         timer = new Timer(1, loop);
         timer.setInitialDelay(1);
         timer.start();
@@ -207,8 +209,7 @@ public class Raytracer extends JComponent {
 
         Surface spinningSurface;
 
-        TraceLoop(Surface spinningSurface) {
-            this.spinningSurface = spinningSurface;
+        TraceLoop() {
             lastMS = System.currentTimeMillis();
         }
     @Override
@@ -220,8 +221,6 @@ public class Raytracer extends JComponent {
             fps = (1.0/deltaMS)/1000.0;
             lastMS = System.currentTimeMillis();
             traceShaded(false);
-
-            spinningSurface.setLookAt(new Vec3(Math.sin(lastMS/1000.0), 0, Math.cos(lastMS/1000.0)));
         }
     }
 

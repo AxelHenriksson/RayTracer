@@ -3,26 +3,18 @@ import java.awt.image.BufferedImage;
 
 public abstract class Material {
     private Color albedo;
-    BufferedImage texture;
 
     Material(Color albedo) {
         this.albedo = albedo;
     }
-    Material(BufferedImage texture) { this.texture = texture; }
 
     // Surface scattering
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) { return null; }
     // Volumetric scattering
     public Ray scatter(Ray r, Vec3 pos) { return null; }
 
-    Color getAlbedo(double u, double v) {
-        if(texture == null) {
+    Color getAlbedo() {
             return albedo;
-        } else {
-            int x = (int) (u * texture.getWidth());
-            int y = (int) (v * texture.getHeight());
-            return new Color(texture.getRGB(x, y));
-        }
     }
 
     static Vec3 reflect(Vec3 v, Vec3 n) {
@@ -39,7 +31,7 @@ public abstract class Material {
     static Vec3 refract(Vec3 v, Vec3 n, double rRatio) {
         Vec3 uv = v.unitVector();
         double dt = Vec3.dot(uv, n);
-        double discriminant = 1.0 - rRatio*rRatio*(1-dt*dt);
+        double discriminant = 1.0 - ((rRatio*rRatio)*(1-(dt*dt)));
         if(discriminant > 0) {
             return Vec3.subtract(Vec3.multiply(Vec3.subtract(uv, Vec3.multiply(n, dt)), rRatio), Vec3.multiply(n, Math.sqrt(discriminant)));
         } else {

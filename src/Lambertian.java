@@ -6,9 +6,7 @@ public class Lambertian extends Material {
     Lambertian(Color albedo) {
         super(albedo);
     }
-    Lambertian(BufferedImage texture) {
-        super(texture);
-    }
+    Lambertian(float r, float g, float b) { super(new Color(r, g, b)); }
 
     @Override
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) {

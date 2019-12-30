@@ -3,8 +3,8 @@ import java.awt.*;
 public class VolumetricSphere extends Sphere {
     private double density;
 
-    VolumetricSphere(Vec3 pos, Vec3 rot, double radius, Material material, double density) {
-        super(pos, rot, radius, material);
+    VolumetricSphere(Vec3 pos, double radius, Material material, double density) {
+        super(pos, radius, material);
         this.density = density;
     }
 
@@ -24,13 +24,13 @@ public class VolumetricSphere extends Sphere {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = mat.scatter(r, hitPos);
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0));
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
                 } else {
                 if (t < t_max && t > t_min) {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = new Ray(hitPos, r.direction());
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0));
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
                 }
             }
         }

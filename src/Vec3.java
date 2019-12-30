@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.util.Arrays;
 
 public class Vec3 {
     double x, y, z;
@@ -12,15 +13,12 @@ public class Vec3 {
     static Vec3 add(Vec3 v1, Vec3 v2) {
         return new Vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
     }
-
     static Vec3 add(Vec3 v1, Vec3 v2, Vec3 v3) {
         return Vec3.add(v1, Vec3.add(v2, v3));
     }
 
-    static Vec3 subtract(Vec3 v1, Vec3 v2) {
-        return new Vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-    }
-
+    static Vec3 subtract(Vec3 v1, Vec3 v2) { return new Vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z); }
+    
     static Vec3 multiply(Vec3 v1, double fac) {
         return new Vec3(v1.x * fac, v1.y * fac, v1.z * fac);
     }

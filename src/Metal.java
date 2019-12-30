@@ -8,10 +8,6 @@ public class Metal extends Material {
         super(albedo);
         this.roughness = Utils.clamp(roughness, 0, 1);
     }
-    Metal(BufferedImage texture, double roughness) {
-        super(texture);
-        this.roughness = Utils.clamp(roughness, 0, 1);
-    }
 
 
     //Surface scattering
