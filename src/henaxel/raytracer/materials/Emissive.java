@@ -1,9 +1,13 @@
+package henaxel.raytracer.materials;
+
+import henaxel.raytracer.Ray;
+import henaxel.utils.Vec3;
+
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class Emissive extends Material {
 
-    Emissive(Color color) {
+    public Emissive(Color color) {
         super(color);
     }
 

@@ -1,8 +1,10 @@
+package henaxel.raytracer;
+
 import java.util.ArrayList;
 
 public class Environment {
     private ArrayList<Surface> surfaces;
-    Camera activeCam;
+    public Camera activeCam;
 
 
     public Environment() {

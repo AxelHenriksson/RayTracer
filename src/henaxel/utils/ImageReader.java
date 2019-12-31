@@ -1,3 +1,5 @@
+package henaxel.utils;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,7 +15,7 @@ public class ImageReader {
             File file = new File(path);
             loaded = ImageIO.read(file);
         } catch (IOException e) {
-            System.out.println("ImageReader: IOException loading image!");
+            System.out.println("henaxel.utils.ImageReader: IOException loading image!");
             e.printStackTrace();
         }
         return loaded;

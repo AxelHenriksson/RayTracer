@@ -1,3 +1,7 @@
+package henaxel.raytracer;
+
+import henaxel.utils.Vec3;
+
 public class Ray {
     private Vec3 pos;
     private Vec3 dir;

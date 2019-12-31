@@ -1,14 +1,18 @@
+package henaxel.raytracer.materials;
+
+import henaxel.utils.Vec3;
+import henaxel.raytracer.Ray;
 import java.awt.*;
 
 public class Dielectric extends Material {
     private double refIndex;
 
 
-    Dielectric(Double refIndex) {
+    public Dielectric(Double refIndex) {
         this(new Color(1.0f, 1.0f, 1.0f), refIndex);
     }
-
-    Dielectric(Color albedo, Double refIndex) {
+    
+    public Dielectric(Color albedo, Double refIndex) {
         super(albedo);
         this.refIndex = refIndex;
     }

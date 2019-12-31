@@ -1,4 +1,7 @@
+package henaxel.raytracer;
+
 import henaxel.workbench.*;
+import henaxel.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -32,13 +35,13 @@ public class Raytracer extends JComponent {
     private double progress;
     private double renderTime;
 
-    Raytracer() {
+    public Raytracer() {
         setBackground(Color.MAGENTA);
     }
 
 
 
-    void traceNormals(boolean logProgress) {
+    public void traceNormals(boolean logProgress) {
         Camera cam = env.activeCam;
         cam.setAspectRatio((double)imageWidth/imageHeight);
         progress = 0;
@@ -82,9 +85,9 @@ public class Raytracer extends JComponent {
         }
             return getBackground(r);
     }
-
-
-    void traceShaded(boolean logProgress) {
+    
+    
+    public void traceShaded(boolean logProgress) {
         Camera cam = env.activeCam;
         cam.setAspectRatio((double)imageWidth/imageHeight);
         progress = 0;
@@ -148,15 +151,15 @@ public class Raytracer extends JComponent {
         }
         repaint();
     }
-
-
-    void setSamples(int samples) {this.samples = samples; }
-    void setDepth(int depth) { this.depth = depth; }
-    void setEnvironment(Environment env) { this.env = env; }
-    void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
-
-    double getProgress() { return progress; }
-    double getRenderTime() { return renderTime; }
+    
+    
+    public void setSamples(int samples) {this.samples = samples; }
+    public void setDepth(int depth) { this.depth = depth; }
+    public void setEnvironment(Environment env) { this.env = env; }
+    public void setClipDist(double t_min, double t_max) { this.t_min = t_min; this.t_max = t_max; }
+    
+    public double getProgress() { return progress; }
+    public double getRenderTime() { return renderTime; }
 
 
     public void saveImage(String path) {
@@ -184,7 +187,7 @@ public class Raytracer extends JComponent {
         try {
             ImageIO.write(bufferedImage, path.substring(path.lastIndexOf(".") + 1), outputFile);
         } catch (IOException e) {
-            System.out.println("ERROR - Raytracer: saveImage() exception");
+            System.out.println("ERROR - henaxel.raytracer.Raytracer: saveImage() exception");
             e.printStackTrace();
         }
         JOptionPane.showMessageDialog(null, String.format("Saved as %s", path));

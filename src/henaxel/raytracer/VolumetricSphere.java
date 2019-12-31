@@ -1,9 +1,12 @@
-import java.awt.*;
+package henaxel.raytracer;
+
+import henaxel.raytracer.materials.Material;
+import henaxel.utils.Vec3;
 
 public class VolumetricSphere extends Sphere {
     private double density;
 
-    VolumetricSphere(Vec3 pos, double radius, Material material, double density) {
+    public VolumetricSphere(Vec3 pos, double radius, Material material, double density) {
         super(pos, radius, material);
         this.density = density;
     }

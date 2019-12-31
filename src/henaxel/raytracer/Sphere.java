@@ -1,7 +1,12 @@
+package henaxel.raytracer;
+
+import henaxel.utils.Vec3;
+import henaxel.raytracer.materials.Material;
+
 public class Sphere extends Surface {
     double radius;
 
-    Sphere(Vec3 pos, double radius, Material material) {
+    public Sphere(Vec3 pos, double radius, Material material) {
         super(pos, material);
         this.radius = radius;
     }
