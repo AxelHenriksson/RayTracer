@@ -12,7 +12,7 @@ public class Sphere extends Surface {
     }
 
     @Override
-    HitResult hit(Ray r, double t_min, double t_max) {
+    protected HitResult hit(Ray r, double t_min, double t_max) {
         Vec3 oc = Vec3.subtract(r.origin(), pos);
         double a = Vec3.dot(r.direction(), r.direction());
         double b = Vec3.dot(oc, r.direction());
@@ -39,5 +39,10 @@ public class Sphere extends Surface {
 
         }
         return null;
+    }
+    
+    @Override
+    protected AABB boundingBox() {
+        return new AABB(Vec3.subtract(pos, new Vec3(radius, radius, radius)), Vec3.add(pos, new Vec3(radius, radius, radius)));
     }
 }

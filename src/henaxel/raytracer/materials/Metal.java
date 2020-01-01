@@ -13,6 +13,10 @@ public class Metal extends Material {
         super(albedo);
         this.roughness = Utils.clamp(roughness, 0, 1);
     }
+    public Metal(double r, double g, double b, double roughness) {
+        super(new Color((float)r, (float)g, (float)b));
+        this.roughness = Utils.clamp(roughness, 0, 1);
+    }
 
 
     //Surface scattering

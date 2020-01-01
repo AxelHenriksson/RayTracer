@@ -63,6 +63,15 @@ public class Vec3 {
     public Color toColor() {
         return new Color((float) (x / length()), (float) (y / length()), (float) (z / length()));
     }
+    
+    public double get(int i) {
+        switch (i) {
+            case 0 : return x;
+            case 1 : return y;
+            case 2 : return z;
+            default : return -1;
+        }
+    }
 
     @Override
     public String toString() {

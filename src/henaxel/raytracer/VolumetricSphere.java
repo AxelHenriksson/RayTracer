@@ -12,7 +12,7 @@ public class VolumetricSphere extends Sphere {
     }
 
     @Override
-    HitResult hit(Ray r, double t_min, double t_max) {
+    protected HitResult hit(Ray r, double t_min, double t_max) {
         Vec3 oc = Vec3.subtract( r.origin(), pos);
         double a = Vec3.dot(r.direction(), r.direction());
         double b = Vec3.dot(oc, r.direction());

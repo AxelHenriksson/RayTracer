@@ -3,7 +3,7 @@ package henaxel.raytracer;
 import henaxel.raytracer.materials.Material;
 import henaxel.utils.Vec3;
 
-public abstract class Surface {
+public abstract class Surface extends Hitable {
     Vec3 pos;
     Material mat;
 
@@ -12,5 +12,5 @@ public abstract class Surface {
         this.mat = material;
     }
 
-    abstract HitResult hit(Ray r, double t_min, double t_max);
+
 }
