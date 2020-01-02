@@ -71,7 +71,7 @@ public class Raytracer extends JComponent {
             progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60); }
+            if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
             
         }
         revalidate();
@@ -118,7 +118,7 @@ public class Raytracer extends JComponent {
             progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
             long time = System.currentTimeMillis();
             double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            if(logProgress) { System.out.printf("Rendering Shaded | Progress: %3.0f%c | Estimated time left: %2dm %2ds\n", progress, '%', (int)estimatedTime/60, (int)estimatedTime%60); }
+            if(logProgress) { System.out.printf("Rendering Shaded | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
             repaint();
         }
         repaint();

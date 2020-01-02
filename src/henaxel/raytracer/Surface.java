@@ -12,5 +12,6 @@ public abstract class Surface extends Hitable {
         this.mat = material;
     }
 
+    protected abstract double[] getUV(Vec3 pos);
 
 }

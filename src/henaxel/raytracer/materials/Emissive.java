@@ -7,9 +7,7 @@ import java.awt.*;
 
 public class Emissive extends Material {
 
-    public Emissive(Color color) {
-        super(color);
-    }
+    public Emissive(Color color) { super(color); }
 
     @Override
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) {

@@ -25,8 +25,9 @@ public class Sphere extends Surface {
                 Vec3 hitPos = r.pointAtParameter(t);
                 Vec3 n = Vec3.divide(Vec3.subtract(hitPos, pos), radius);
                 Ray scatter = mat.scatter(r, hitPos, n);
-
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+                
+                double[] uv = getUV(hitPos);
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1], hitPos)); //TODO : Look over the usage of u and v
             }
             t = (-b + Math.sqrt(discriminant))/a;
             if (t < t_max && t > t_min) {
@@ -34,11 +35,21 @@ public class Sphere extends Surface {
                 Vec3 n = Vec3.divide(Vec3.subtract(hitPos, pos), radius);
                 Ray scatter = mat.scatter(r, hitPos, n);
 
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo());
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0, hitPos)); //TODO : Look over the usage of u and v
             }
 
         }
         return null;
+    }
+    
+    @Override
+    protected double[] getUV(Vec3 p) {
+        double[] uv = new double[2];
+        double phi = Math.atan(p.y/p.x);
+        double theta = Math.asin(p.z);
+        uv[0] = 1-(phi + Math.PI) / (2*Math.PI);
+        uv[1] = (theta + Math.PI/2) / Math.PI;
+        return uv;
     }
     
     @Override

@@ -5,21 +5,16 @@ import henaxel.utils.Vec3;
 import henaxel.raytracer.Ray;
 
 public abstract class Material {
-    private Color albedo;
+    protected Texture albedo;
 
-    protected Material(Color albedo) {
-        this.albedo = albedo;
-    }
+    protected Material(Texture albedo) { this.albedo = albedo; }
+    protected Material(Color albedo) { this.albedo = new ConstantTexture(albedo); }
     protected Material() {}
 
     // Surface scattering
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) { return null; }
     // Volumetric scattering
     public Ray scatter(Ray r, Vec3 pos) { return null; }
-    
-    public Color getAlbedo() {
-            return albedo;
-    }
 
     protected static Vec3 reflect(Vec3 v, Vec3 n) {
         Vec3 uv = v.unitVector();
@@ -41,5 +36,9 @@ public abstract class Material {
         } else {
             return null;
         }
+    }
+    
+    public Color getAlbedo(double u, double v, Vec3 hitPos) {
+        return albedo.color(u, v, hitPos);
     }
 }
