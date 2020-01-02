@@ -35,11 +35,6 @@ public class Raytracer extends JComponent {
     private double progress;
     private double renderTime;
 
-    public Raytracer() {
-        setBackground(Color.MAGENTA);
-    }
-
-
 
     public void traceNormals(boolean logProgress) {
         Camera cam = env.activeCam;
@@ -74,7 +69,6 @@ public class Raytracer extends JComponent {
             if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
             
         }
-        revalidate();
         repaint();
         renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
@@ -122,7 +116,6 @@ public class Raytracer extends JComponent {
             repaint();
         }
         repaint();
-
         renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
     //TODO: check below code
@@ -195,7 +188,10 @@ public class Raytracer extends JComponent {
 
     @Override
     public void paintComponent(Graphics g) {
-        g.drawImage(image, 0, 0, Math.min(this.getWidth(), (int)(((double)imageWidth/imageHeight)*this.getHeight())), Math.min(this.getHeight(), (int)(((double)imageHeight/imageWidth)*this.getWidth())), null);
+        int height = Math.min(this.getHeight(), (int)(((double)imageHeight/imageWidth)*this.getWidth()));
+        int width = Math.min(this.getWidth(), (int)(((double)imageWidth/imageHeight)*this.getHeight()));
+        
+        g.drawImage(image, (this.getWidth()-width)/2, (this.getHeight()-height)/2, width, height, null);
     }
 
 
@@ -238,110 +234,63 @@ public class Raytracer extends JComponent {
                 traceShadedTool(size),
                 toggleTransparentTool(size),
                 resolutionTool(size),
-                sampleTool(size)
+                samDepTool(size)
         );
     }
 
     Tool saveImageTool(int iconSize) {
-        Tool tool = new Tool();
-        JButton button;
-
-        if(getClass().getResource(String.format("res/saveImage%d.png", iconSize)) != null) {
-            button = new JButton(new ImageIcon(getClass().getResource(String.format("res/saveImage%d.png", iconSize))));
-        } else {
-            button = new JButton("saveImage");
-            button.setFont(new Font("Dialog", Font.PLAIN, 10));
-        }
-
-        button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
-        tool.add(button);
-        tool.setBackground(new Color(100, 137, 143));
-
-        button.addActionListener(new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                String path = JOptionPane.showInputDialog("Enter filename with extension.");
-                if (path == null) return;
-                saveImage("src/out/" + path);
-            }
-        });
-
-        return tool;
+        return Tool.buildButtonTool(
+                "Save Image",
+                "saveImage",
+                iconSize,
+                new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        String path = JOptionPane.showInputDialog("Enter filename with extension.");
+                        if (path == null) return;
+                        saveImage("src/out/" + path);
+                    }
+                }
+                );
     }
 
     public Tool traceNormalsTool(int iconSize) {
-        Tool tool = new Tool();
-        JButton button;
-
-        if(getClass().getResource(String.format("res/traceNormals%d.png", iconSize)) != null) {
-            button = new JButton(new ImageIcon(getClass().getResource(String.format("res/traceNormals%d.png", iconSize))));
-        } else {
-            button = new JButton("traceNormals");
-            button.setFont(new Font("Dialog", Font.PLAIN, 10));
-        }
-
-        button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
-        tool.add(button);
-        tool.setBackground(new Color(98, 143, 92));
-
-        button.addActionListener(new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                traceNormals(true);
-            }
-        });
-
-        return tool;
+        return Tool.buildButtonTool(
+                "Trace Normals",
+                "traceNormals",
+                iconSize,
+                new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        traceNormals(true);
+                    }
+                }
+        );
     }
 
     public Tool traceShadedTool(int iconSize) {
-        Tool tool = new Tool();
-        JButton button;
-
-        if(getClass().getResource(String.format("res/traceShaded%d.png", iconSize)) != null) {
-            button = new JButton(new ImageIcon(getClass().getResource(String.format("res/traceShaded%d.png", iconSize))));
-        } else {
-            button = new JButton("traceShaded");
-            button.setFont(new Font("Dialog", Font.PLAIN, 10));
-        }
-
-        button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
-        tool.add(button);
-        tool.setBackground(new Color(98, 143, 92));
-
-        button.addActionListener(new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                traceShaded(true);
-            }
-        });
-
-        return tool;
+        return Tool.buildButtonTool(
+                "Trace Shaded",
+                "traceShaded",
+                iconSize,
+                new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        traceShaded(true);
+                    }
+                }
+        );
     }
 
     public Tool toggleTransparentTool(int iconSize) {
-        Tool tool = new Tool();
-        JToggleButton button;
-
-        if(getClass().getResource(String.format("res/toggleTransparent%d.png", iconSize)) != null) {
-            button = new JToggleButton(new ImageIcon(getClass().getResource(String.format("res/toggleTransparent%d.png", iconSize))));
-        } else {
-            button = new JToggleButton("toggleTransparent", transparentBackground);
-            button.setFont(new Font("Dialog", Font.PLAIN, 10));
-        }
-
-        button.setBackground(Color.white);
-        button.setBorder(BorderFactory.createLineBorder(Color.lightGray, 1));
-        tool.add(button);
-        tool.setBackground(new Color(98, 143, 92));
-
-        button.addActionListener(new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                transparentBackground = !transparentBackground;
-                repaint();
-            }
-        });
-        return tool;
+        return Tool.buildToggleButtonTool(
+                "Transparent",
+                "toggleTransparent",
+                iconSize,
+                transparentBackground,
+                new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        transparentBackground = !transparentBackground;
+                    }
+                }
+        );
     }
 
     public Tool resolutionTool(int iconSize) {
@@ -373,7 +322,7 @@ public class Raytracer extends JComponent {
         return tool;
     }
 
-    public Tool sampleTool(int iconSize) {
+    public Tool samDepTool(int iconSize) {
         Format sampleFormat = NumberFormat.getIntegerInstance();
         JFormattedTextField sampleField = new JFormattedTextField(sampleFormat);
         sampleField.setValue(samples);

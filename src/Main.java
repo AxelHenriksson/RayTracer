@@ -60,9 +60,9 @@ public class Main {
         twoSpheres.add(new Sphere(new Vec3(0,-1000,0), 1000, new Lambertian(perTex)));
         twoSpheres.add(new Sphere(new Vec3(0,2,0), 2, new Lambertian(new ImageTexture(testTex))));
     
-        Vec3 lookFrom2 = new Vec3(13,6,7);
-        Vec3 lookAt2 = new Vec3(0,1,0);
-        twoSpheres.activeCam = new Camera(lookFrom2, lookAt2, new Vec3(0,1,0), 40, 1, 0.5, Vec3.subtract(lookFrom2, lookAt2).length());
+        Vec3 lookFrom2 = new Vec3(6,6,6);
+        Vec3 lookAt2 = new Vec3(0,2,0);
+        twoSpheres.activeCam = new Camera(lookFrom2, lookAt2, new Vec3(0,1,0), 40, 1, 0.2, Vec3.subtract(lookFrom2, lookAt2).length());
         
         Raytracer rt = new Raytracer();
         rt.setEnvironment(twoSpheres);

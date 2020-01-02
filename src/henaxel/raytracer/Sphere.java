@@ -44,9 +44,10 @@ public class Sphere extends Surface {
     
     @Override
     protected double[] getUV(Vec3 p) {
+        p = Vec3.divide(Vec3.subtract(p, pos), radius);
         double[] uv = new double[2];
-        double phi = Math.atan(p.y/p.x);
-        double theta = Math.asin(p.z);
+        double phi = Math.atan2(p.z, p.x);
+        double theta = -Math.asin(p.y);
         uv[0] = 1-(phi + Math.PI) / (2*Math.PI);
         uv[1] = (theta + Math.PI/2) / Math.PI;
         return uv;
