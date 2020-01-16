@@ -9,6 +9,9 @@ public class Tool extends JPanel {
     public Tool() {
 
     }
+    public Tool(LayoutManager layoutMGR) {
+        this.setLayout(layoutMGR);
+    }
 
     
     public static Tool buildButtonTool(String label, String toolName, int iconSize, AbstractAction abstractAction) {

@@ -5,6 +5,9 @@ import henaxel.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,6 +31,8 @@ public class Raytracer extends JComponent {
     private int depth = Defaults.DEPTH;
     private double gamma = Defaults.GAMMA;
     private boolean transparentBackground = Defaults.TRANSPARENT;
+    private Thread[] renderThreads;
+    private int threadNumber = Defaults.RTHREAD_NUMBER;
 
     double fps;
     Timer timer;
@@ -37,40 +42,45 @@ public class Raytracer extends JComponent {
 
 
     public void traceNormals(boolean logProgress) {
-        Camera cam = env.activeCam;
-        cam.setAspectRatio((double)imageWidth/imageHeight);
-        progress = 0;
-        long t0 = System.currentTimeMillis();
-        image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        for(int col = 0; col<imageWidth;col++) {
-            for (int row = 0; row < imageHeight; row++) {
-                float red = 0;
-                float green = 0;
-                float blue = 0;
-                float alpha = 0;
-                for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / imageWidth;
-                    double v = ((double) row + Math.random()) / imageHeight;
-                    Ray r = cam.getRay(u, v);
-                    Color sColor = colorNormal(r);
-                    red += sColor.getRed()/255.0;
-                    green += sColor.getGreen()/255.0;
-                    blue += sColor.getBlue()/255.0;
-                    alpha += sColor.getAlpha()/255.0;
+        Thread thread = new Thread(() -> {
+            Camera cam = env.activeCam;
+            cam.setAspectRatio((double)imageWidth/imageHeight);
+            progress = 0;
+            long t0 = System.currentTimeMillis();
+            image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+
+            for(int col = 0; col<imageWidth;col++) {
+                for (int row = 0; row < imageHeight; row++) {
+                    float red = 0;
+                    float green = 0;
+                    float blue = 0;
+                    float alpha = 0;
+                    for(int s = 0; s < samples; s++) {
+                        double u = ((double) col + Math.random()) / imageWidth;
+                        double v = ((double) row + Math.random()) / imageHeight;
+                        Ray r = cam.getRay(u, v);
+                        Color sColor = colorNormal(r);
+                        red += sColor.getRed()/255.0;
+                        green += sColor.getGreen()/255.0;
+                        blue += sColor.getBlue()/255.0;
+                        alpha += sColor.getAlpha()/255.0;
+                    }
+                    Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
+                    image.setRGB(col, row, color.getRGB());
                 }
-                Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
-                image.setRGB(col, row, color.getRGB());
+                //TODO: Implement proper progress tracking as tool
+                progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
+                long time = System.currentTimeMillis();
+                double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
+                if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
+
             }
-            //TODO: Implement proper progress tracking as tool
-            progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
-            long time = System.currentTimeMillis();
-            double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            if(logProgress) { System.out.printf("Rendering Normals | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
-            
-        }
-        repaint();
-        renderTime = (System.currentTimeMillis() - t0)/1000.0;
+            repaint();
+            renderTime = (System.currentTimeMillis() - t0)/1000.0;
+
+        }); thread.start();
+
     }
     private Color colorNormal(Ray r) {
         HitResult hr = env.hit(r,  t_min, t_max);
@@ -81,44 +91,58 @@ public class Raytracer extends JComponent {
     }
     
     
-    public void traceShaded(boolean logProgress) {
+    public void traceShaded(boolean gradualRepaint) {
+        if (renderThreads != null) {
+            for (Thread thread : renderThreads) {
+                thread.interrupt();
+            }
+        }
+
         Camera cam = env.activeCam;
         cam.setAspectRatio((double)imageWidth/imageHeight);
-        progress = 0;
-        long t0 = System.currentTimeMillis();
         image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        for(int col = 0; col<imageWidth;col++) {
-            for (int row = 0; row < imageHeight; row++) {
-                float red = 0;
-                float green = 0;
-                float blue = 0;
-                float alpha = 0;
-                for(int s = 0; s < samples; s++) {
-                    double u = ((double) col + Math.random()) / imageWidth;
-                    double v = ((double) row + Math.random()) / imageHeight;
-                    Ray r = cam.getRay(u, v);
-                    Color sColor = colorShaded(r, 0);
-                    red += sColor.getRed()/255.0;
-                    green += sColor.getGreen()/255.0;
-                    blue += sColor.getBlue()/255.0;
-                    alpha += sColor.getAlpha()/255.0;
-                }
-                Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
-                color = Utils.correctGamma(color, gamma);
-                image.setRGB(col, row, color.getRGB());
+        //TODO: look over pixel lost when  dividing threadcells
+        int threadWidth = (int) Math.sqrt(threadNumber);
+        int threadHeight = threadNumber/threadWidth;
+        int cellWidth = imageWidth/threadWidth;
+        int cellHeight = imageHeight/threadHeight;
+        renderThreads = new Thread[threadNumber];
+
+        for(int cellX = 0; cellX < threadWidth; cellX++) {
+            for(int cellY = 0; cellY < threadHeight; cellY++) {
+                int finalCellX = cellX;
+                int finalCellY = cellY;
+
+                Thread thread = new Thread(() -> {
+                    for(int col = finalCellX*cellWidth; col< (finalCellX+1)*cellWidth; col++) {
+                        for (int row = finalCellY*cellHeight; row < (finalCellY+1)*cellHeight; row++) {
+                            if(Thread.currentThread().isInterrupted()) return;
+                            float red = 0, green = 0, blue = 0, alpha = 0;
+                            for(int s = 0; s < samples; s++) {
+                                double u = ((double) col + Math.random()) / imageWidth;
+                                double v = ((double) row + Math.random()) / imageHeight;
+                                Ray r = cam.getRay(u, v);
+                                Color sColor = colorShaded(r, 0);
+                                red += sColor.getRed()/255.0;
+                                green += sColor.getGreen()/255.0;
+                                blue += sColor.getBlue()/255.0;
+                                alpha += sColor.getAlpha()/255.0;
+                            }
+                            Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
+                            color = Utils.correctGamma(color, gamma);
+                            image.setRGB(col, row, color.getRGB());
+                        }
+                        if(gradualRepaint) repaint();
+                    }
+                    repaint();
+
+                });
+                renderThreads[cellX + cellY*threadWidth] = thread;
+                thread.start();
             }
-            //TODO: Implement proper progress tracking as tool
-            progress = Math.max(0.1, (100.0*((double)col/imageWidth)));
-            long time = System.currentTimeMillis();
-            double estimatedTime = ((((time-t0)*100.0)/progress)/1000.0) - ((time-t0)/1000.0);
-            if(logProgress) { System.out.printf("Rendering Shaded | Progress: %3.0f%c | ETR: %1dh %2dm %2ds\n", progress, '%', (int)estimatedTime/3600, (int)(estimatedTime/60)%60, (int)estimatedTime%60); }
-            repaint();
         }
-        repaint();
-        renderTime = (System.currentTimeMillis() - t0)/1000.0;
     }
-    //TODO: check below code
     private Color colorShaded(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
         if (hr == null) { return getBackground(r); }
@@ -195,7 +219,6 @@ public class Raytracer extends JComponent {
     }
 
 
-
     public void traceLoop() {
         TraceLoop loop = new TraceLoop();
         timer = new Timer(1, loop);
@@ -224,6 +247,11 @@ public class Raytracer extends JComponent {
     }
 
 
+
+
+
+
+
     // TOOLS ---------------------------
 
     public Toolbar toolbar() {
@@ -234,7 +262,8 @@ public class Raytracer extends JComponent {
                 traceShadedTool(size),
                 toggleTransparentTool(size),
                 resolutionTool(size),
-                samDepTool(size)
+                samDepTool(size),
+                threadCountTool(size)
         );
     }
 
@@ -294,59 +323,74 @@ public class Raytracer extends JComponent {
     }
 
     public Tool resolutionTool(int iconSize) {
-        Format resFormat = NumberFormat.getIntegerInstance();
-        JFormattedTextField widthField = new JFormattedTextField(resFormat);
+        JFormattedTextField widthField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         widthField.setValue(imageWidth);
-        widthField.setColumns(6);
+        widthField.setColumns(4);
+        widthField.setBorder(new TitledBorder(new LineBorder(Color.black), "Width"));
         widthField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
             imageWidth = Integer.parseInt(widthField.getText());
             }
         });
 
-        JFormattedTextField heightField = new JFormattedTextField(resFormat);
+        JFormattedTextField heightField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         heightField.setValue(imageHeight);
-        heightField.setColumns(6);
+        heightField.setColumns(4);
+        heightField.setBorder(new TitledBorder(new LineBorder(Color.black), "Height"));
         heightField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
             imageHeight = Integer.parseInt(heightField.getText());
         }
         });
 
-        Tool tool = new Tool();
-        tool.setLayout(new GridLayout(2, 1));
+        Tool tool = new Tool(new GridLayout(2, 1));
         tool.add(widthField);
         tool.add(heightField);
-        tool.setBackground(new Color(87, 87, 87));
 
         return tool;
     }
 
     public Tool samDepTool(int iconSize) {
-        Format sampleFormat = NumberFormat.getIntegerInstance();
-        JFormattedTextField sampleField = new JFormattedTextField(sampleFormat);
+        JFormattedTextField sampleField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         sampleField.setValue(samples);
-        sampleField.setColumns(6);
+        sampleField.setColumns(4);
+        sampleField.setBorder(new TitledBorder(new LineBorder(Color.black), "Samples"));
         sampleField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
             samples = Integer.parseInt(sampleField.getText());
         }
         });
 
-        JFormattedTextField depthField = new JFormattedTextField(sampleFormat);
+        JFormattedTextField depthField = new JFormattedTextField(NumberFormat.getIntegerInstance());
         depthField.setValue(depth);
-        depthField.setColumns(6);
+        depthField.setColumns(4);
+        depthField.setBorder(new TitledBorder(new LineBorder(Color.black), "Depth"));
         depthField.addPropertyChangeListener("value", new PropertyChangeListener()
         {public void propertyChange(PropertyChangeEvent evt) {
             depth = Integer.parseInt(depthField.getText());
         }
         });
 
-        Tool tool = new Tool();
-        tool.setLayout(new GridLayout(2, 1));
+        Tool tool = new Tool(new GridLayout(2, 1));
         tool.add(sampleField);
         tool.add(depthField);
-        tool.setBackground(new Color(87, 87, 87));
+
+        return tool;
+    }
+
+    public Tool threadCountTool(int iconSize) {
+        JFormattedTextField threadField = new JFormattedTextField(NumberFormat.getIntegerInstance());
+        threadField.setValue(threadNumber);
+        threadField.setColumns(4);
+        threadField.setBorder(new TitledBorder(new LineBorder(Color.black), "Threads"));
+        threadField.addPropertyChangeListener("value", new PropertyChangeListener()
+        {public void propertyChange(PropertyChangeEvent evt) {
+            threadNumber = Integer.parseInt(threadField.getText());
+        }
+        });
+
+        Tool tool = new Tool(new GridLayout(1, 1));
+        tool.add(threadField);
 
         return tool;
     }
