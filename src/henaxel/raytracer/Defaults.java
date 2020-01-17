@@ -12,7 +12,7 @@ public class Defaults {
 
     public static final int MAX_FPS = 60;
 
-    public static final int RTHREAD_NUMBER = 4;
+    public static final int RTHREAD_NUMBER = 7;
     public static final boolean CONSTRUCT_BVH = true;
 
 

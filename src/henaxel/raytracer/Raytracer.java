@@ -5,7 +5,6 @@ import henaxel.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -16,7 +15,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.text.Format;
 import java.text.NumberFormat;
 
 
@@ -31,7 +29,7 @@ public class Raytracer extends JComponent {
     private int depth = Defaults.DEPTH;
     private double gamma = Defaults.GAMMA;
     private boolean transparentBackground = Defaults.TRANSPARENT;
-    private Thread[] renderThreads;
+    private RenderThread[] renderThreads;
     private int threadNumber = Defaults.RTHREAD_NUMBER;
 
     double fps;
@@ -92,57 +90,110 @@ public class Raytracer extends JComponent {
     
     
     public void traceShaded(boolean gradualRepaint) {
+
+        //Cancel any ongoing rendering by interrupting any running renderThreads
         if (renderThreads != null) {
-            for (Thread thread : renderThreads) {
-                thread.interrupt();
+            for (RenderThread thread : renderThreads) {
+                if (thread != null) {
+                    thread.interrupt();
+                }
             }
         }
 
-        Camera cam = env.activeCam;
-        cam.setAspectRatio((double)imageWidth/imageHeight);
+        env.activeCam.setAspectRatio((double)imageWidth/imageHeight);
         image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
-        //TODO: look over pixel lost when  dividing threadcells
-        int threadWidth = (int) Math.sqrt(threadNumber);
-        int threadHeight = threadNumber/threadWidth;
-        int cellWidth = imageWidth/threadWidth;
-        int cellHeight = imageHeight/threadHeight;
-        renderThreads = new Thread[threadNumber];
+        //Structure grid aligned renderThread cells and start their renderThreads
+        int horizontalThreads = (int) Math.sqrt(threadNumber);
+        int verticalThreads = threadNumber/horizontalThreads;
+        int cellWidth = imageWidth/horizontalThreads;
+        int cellHeight = imageHeight/verticalThreads;
+        renderThreads = new RenderThread[threadNumber];
 
-        for(int cellX = 0; cellX < threadWidth; cellX++) {
-            for(int cellY = 0; cellY < threadHeight; cellY++) {
-                int finalCellX = cellX;
-                int finalCellY = cellY;
+        for(int cellX = 0; cellX < horizontalThreads; cellX++) {
+            for(int cellY = 0; cellY < verticalThreads; cellY++) {
 
-                Thread thread = new Thread(() -> {
-                    for(int col = finalCellX*cellWidth; col< (finalCellX+1)*cellWidth; col++) {
-                        for (int row = finalCellY*cellHeight; row < (finalCellY+1)*cellHeight; row++) {
-                            if(Thread.currentThread().isInterrupted()) return;
-                            float red = 0, green = 0, blue = 0, alpha = 0;
-                            for(int s = 0; s < samples; s++) {
-                                double u = ((double) col + Math.random()) / imageWidth;
-                                double v = ((double) row + Math.random()) / imageHeight;
-                                Ray r = cam.getRay(u, v);
-                                Color sColor = colorShaded(r, 0);
-                                red += sColor.getRed()/255.0;
-                                green += sColor.getGreen()/255.0;
-                                blue += sColor.getBlue()/255.0;
-                                alpha += sColor.getAlpha()/255.0;
-                            }
-                            Color color = new Color( red/samples,  green/samples,  blue/samples, alpha/samples);
-                            color = Utils.correctGamma(color, gamma);
-                            image.setRGB(col, row, color.getRGB());
-                        }
-                        if(gradualRepaint) repaint();
-                    }
-                    repaint();
+                RenderThread thread = buildShadedThread(
+                        cellX*cellWidth,
+                        cellY*cellHeight,
+                        Math.max((cellX+1)*cellWidth, cellX == (horizontalThreads-1) ? imageWidth : 0),
+                        Math.max((cellY+1)*cellHeight, cellY == (verticalThreads-1) ? imageHeight : 0),
+                        cellX + cellY*horizontalThreads,
+                        gradualRepaint
+                );
 
-                });
-                renderThreads[cellX + cellY*threadWidth] = thread;
+                renderThreads[cellX + cellY*horizontalThreads] = thread;
+                thread.start();
+            }
+        }
+
+        //Get bounds and start any remaining renderThreads in existing renderThread cells
+        for(int i = verticalThreads*horizontalThreads; i < threadNumber; i++) {
+            int[] nTB = getNewThreadCellBounds();
+            if (nTB != null) {
+                RenderThread thread = buildShadedThread(nTB[0], nTB[1], nTB[2], nTB[3], i, gradualRepaint);
+                renderThreads[i] = thread;
                 thread.start();
             }
         }
     }
+
+    //Build a renderThread capable of rendering a renderThread cell
+    private RenderThread buildShadedThread(int startX, int startY, int endX, int endY, int index, boolean gradualRepaint) {
+        return new RenderThread(startX, startY, endX, endY, index)
+        {
+            public void run() {
+                for (int col = startX; col < endX; col++) {
+                    for (int row = startY; row < endY; row++) {
+                        if (Thread.currentThread().isInterrupted()) return;
+                        float red = 0, green = 0, blue = 0, alpha = 0;
+                        for (int s = 0; s < samples; s++) {
+                            double u = ((double) col + Math.random()) / imageWidth;
+                            double v = ((double) row + Math.random()) / imageHeight;
+                            Ray r = env.activeCam.getRay(u, v);
+                            Color sColor = colorShaded(r, 0);
+                            red += sColor.getRed() / 255.0;
+                            green += sColor.getGreen() / 255.0;
+                            blue += sColor.getBlue() / 255.0;
+                            alpha += sColor.getAlpha() / 255.0;
+                        }
+                        Color color = new Color(red / samples, green / samples, blue / samples, alpha / samples);
+                        color = Utils.correctGamma(color, gamma);
+                        image.setRGB(col, row, color.getRGB());
+                    }
+                    if (gradualRepaint) repaint();
+                    currentX = col;
+                }
+                repaint();
+
+                int[] nTB = getNewThreadCellBounds();
+                if (nTB != null) {
+                    RenderThread newThread = buildShadedThread(nTB[0], nTB[1], nTB[2], nTB[3], index, gradualRepaint);
+                    renderThreads[index] = newThread;
+                    newThread.start();
+                }
+            }
+        };
+    }
+
+    //Get the renderThread bounds when inserting a new renderthread into an existing cell. Returns new cells bounds and shortens the existing in x
+    private int[] getNewThreadCellBounds() {
+        for(RenderThread rThread : renderThreads) {
+            if (rThread.isAlive() && rThread.endX - rThread.currentX > 20) {
+                int[] result = new int[]{
+                        rThread.currentX + (rThread.endX - rThread.currentX) / 2,
+                        rThread.startY,
+                        rThread.endX,
+                        rThread.endY
+                };
+                rThread.endX = rThread.currentX + (rThread.endX - rThread.currentX)/2;
+                return result;
+            }
+        }
+        return null;
+    }
+
+    //Calculate the color of a shaded sample
     private Color colorShaded(Ray r, int depth) {
         HitResult hr = env.hit(r, t_min, t_max);
         if (hr == null) { return getBackground(r); }
@@ -254,13 +305,19 @@ public class Raytracer extends JComponent {
 
     // TOOLS ---------------------------
 
-    public Toolbar toolbar() {
+    public Toolbar actionBar() {
         int size = 32;
         return new Toolbar(size,
                 saveImageTool(size),
                 traceNormalsTool(size),
                 traceShadedTool(size),
-                toggleTransparentTool(size),
+                toggleTransparentTool(size)
+        );
+    }
+
+    public Toolbar propertiesBar() {
+        int size = 32;
+        return new Toolbar(size,
                 resolutionTool(size),
                 samDepTool(size),
                 threadCountTool(size)
