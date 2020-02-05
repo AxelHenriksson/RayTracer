@@ -1,7 +1,7 @@
 package henaxel.raytracer.materials;
 
 import java.awt.*;
-import henaxel.utils.Vec3;
+import henaxel.raytracer.utils.Vec3;
 import henaxel.raytracer.Ray;
 
 public abstract class Material {

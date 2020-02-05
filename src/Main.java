@@ -1,6 +1,6 @@
 import henaxel.raytracer.*;
 import henaxel.raytracer.materials.*;
-import henaxel.utils.*;
+import henaxel.raytracer.utils.*;
 import henaxel.workbench.*;
 
 import java.awt.*;

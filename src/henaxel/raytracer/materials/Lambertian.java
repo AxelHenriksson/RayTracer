@@ -1,7 +1,9 @@
 package henaxel.raytracer.materials;
 
+
 import henaxel.raytracer.Ray;
-import henaxel.utils.*;
+import henaxel.raytracer.utils.*;
+
 import java.awt.*;
 
 public class Lambertian extends Material {

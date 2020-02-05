@@ -1,7 +1,7 @@
 package henaxel.raytracer;
 
 import henaxel.workbench.*;
-import henaxel.utils.*;
+import henaxel.raytracer.utils.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

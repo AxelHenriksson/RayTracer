@@ -1,4 +1,4 @@
-package henaxel.utils;
+package henaxel.raytracer.utils;
 
 import java.awt.*;
 

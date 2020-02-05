@@ -1,4 +1,4 @@
-package henaxel.utils;
+package henaxel.raytracer.utils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -15,7 +15,7 @@ public class ImageReader {
             File file = new File(path);
             loaded = ImageIO.read(file);
         } catch (IOException e) {
-            System.out.println("henaxel.utils.ImageReader: IOException loading image!");
+            System.out.println("henaxel.raytracer.utils.ImageReader: IOException loading image!");
             e.printStackTrace();
         }
         return loaded;

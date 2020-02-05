@@ -1,7 +1,7 @@
 package henaxel.raytracer;
 
 import henaxel.raytracer.materials.Material;
-import henaxel.utils.Vec3;
+import henaxel.raytracer.utils.Vec3;
 
 public abstract class Surface extends Hitable {
     Vec3 pos;

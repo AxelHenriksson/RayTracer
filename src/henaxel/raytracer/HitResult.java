@@ -1,7 +1,7 @@
 package henaxel.raytracer;
 
-import henaxel.utils.*;
 import java.awt.*;
+import henaxel.raytracer.utils.*;
 
 public class HitResult {
     public Vec3 pos;

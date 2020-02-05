@@ -1,6 +1,6 @@
 package henaxel.raytracer;
 
-import henaxel.utils.Vec3;
+import henaxel.raytracer.utils.Vec3;
 
 public class Camera {
     private Vec3 lookFrom;

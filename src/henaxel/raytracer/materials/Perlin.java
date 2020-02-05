@@ -1,7 +1,7 @@
 package henaxel.raytracer.materials;
 
-import henaxel.utils.Utils;
-import henaxel.utils.Vec3;
+import henaxel.raytracer.utils.Utils;
+import henaxel.raytracer.utils.Vec3;
 
 public class Perlin {
     private Vec3[] ranVec = perlinGenerate();
