@@ -26,8 +26,9 @@ public class Main {
         rt.setEnvironment(twoSpheres);
 
         Workbench wb = new Workbench(rt);
-        wb.addToolbar(BorderLayout.EAST, rt.actionBar());
-        wb.addToolbar(BorderLayout.SOUTH, rt.propertiesBar());
+        //wb.add(new TabbedBar(rt.actionBar(), rt.propertiesBar()) BorderLayout.NORTH);
+        wb.add(rt.actionBar(), BorderLayout.NORTH);
+        wb.add(rt.propertiesBar(), BorderLayout.EAST);
 
 
 

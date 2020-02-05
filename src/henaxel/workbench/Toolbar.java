@@ -7,11 +7,11 @@ import java.awt.*;
 public class Toolbar extends JPanel {
     private int width;
 
-    public Toolbar(int width, Tool... tools) {
+    public Toolbar(String name, int width, Tool... tools) {
+        setName(name);
         this.width = width;
-        for(Tool tool : tools) {
-            addTools(tool);
-        }
+        addTools(tools);
+
     }
 
     public void addTools(Tool... tools) {

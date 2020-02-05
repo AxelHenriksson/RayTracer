@@ -16,9 +16,14 @@ public class Workbench extends JFrame {
         setVisible(true);
     }
 
-    public void addToolbar(String anchor, Toolbar toolbar) {
+    public void add(Toolbar toolbar, String anchor) {
         toolbar.setAnchor(anchor);
         getContentPane().add(toolbar, anchor);
+        revalidate();
+    }
+
+    public void add(TabbedBar tabbedBar, String anchor) {
+        getContentPane().add(tabbedBar, anchor);
         revalidate();
     }
 }

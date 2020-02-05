@@ -307,7 +307,7 @@ public class Raytracer extends JComponent {
 
     public Toolbar actionBar() {
         int size = 32;
-        return new Toolbar(size,
+        return new Toolbar("Actions", size,
                 saveImageTool(size),
                 traceNormalsTool(size),
                 traceShadedTool(size),
@@ -317,7 +317,7 @@ public class Raytracer extends JComponent {
 
     public Toolbar propertiesBar() {
         int size = 32;
-        return new Toolbar(size,
+        return new Toolbar("Properties", size,
                 resolutionTool(size),
                 samDepTool(size),
                 threadCountTool(size)
