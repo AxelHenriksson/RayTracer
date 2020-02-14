@@ -1,6 +1,6 @@
 package henaxel.raytracer.materials;
 
-import henaxel.node.BaseNode;
+import henaxel.raytracer.node.InLink;
 import henaxel.raytracer.utils.Vec3;
 import henaxel.raytracer.Ray;
 import java.awt.*;
@@ -15,7 +15,12 @@ public class Dielectric extends Material {
     }
     
     public Dielectric(Texture albedo, Texture refIndex) {
-        super("Dielectric", null, null, null, null);
+        super("Dielectric",
+                new InLink[] {
+                        new InLink("Albedo", null),
+                        new InLink("Refractive Index", null)
+                }
+        );
         this.albedo = albedo;
         this.refIndex = refIndex;
     }
@@ -28,20 +33,22 @@ public class Dielectric extends Material {
         double rRatio;
         double reflectProb;
         double cosine;
+        
+        double rIndex = refIndex.color(0,0).getRed()/255.0; //TODO: Implement proper texture mapping for refractive index
 
         if (Vec3.dot(r.direction(), n) > 0) {
             outN = Vec3.multiply(n, -1);
-            rRatio = refIndex;
-            cosine = refIndex * Vec3.dot(r.direction(), n) / r.direction().length();
+            rRatio = rIndex ;
+            cosine = rIndex * Vec3.dot(r.direction(), n) / r.direction().length();
         } else {
             outN = n;
-            rRatio = 1/refIndex;
+            rRatio = 1/rIndex;
             cosine = -Vec3.dot(r.direction(), n) / r.direction().length();
         }
 
         Vec3 refracted = Material.refract(r.direction(), outN, rRatio);
         if(refracted != null) {
-            reflectProb = Material.schlick(cosine, refIndex);
+            reflectProb = Material.schlick(cosine, rIndex);
         } else {
             reflectProb = 1.0;
         }

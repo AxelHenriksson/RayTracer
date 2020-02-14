@@ -19,7 +19,7 @@ public class Main {
         Texture perTex = new NoiseTexture(1, 3);
         twoSpheres.add(new Sphere(new Vec3(0,-1000,0), 1000, new Lambertian(new ImageTexture(testTex))));
 
-        Sphere metalSphere = new Sphere(new Vec3(0,2,0), 2, new Metal(new Color(100, 100, 100), 0.1));
+        Sphere metalSphere = new Sphere(new Vec3(0,2,0), 2, new Metal(checker, 0.2));
         twoSpheres.add(metalSphere);
 
         Vec3 lookFrom2 = new Vec3(6,6,6);
@@ -38,13 +38,18 @@ public class Main {
 
         //rt.traceShaded(true);
 
+        
         NodeEditor ne = new NodeEditor();
         ne.add(ne.toolbarBasicTools(), BorderLayout.NORTH);
-        ne.setNodableList(
-                new Metal(),
-                new Lambertian());
-        metalSphere.getMaterial().edit(ne);
-
+        ne.setNodeClassList(new Class[] {
+                Metal.class,
+                        Lambertian.class,
+                        Dielectric.class,
+                        ImageTexture.class,
+                }
+                );
+        metalSphere.getMaterial().nodeEdit(ne);
+        
 
 
 

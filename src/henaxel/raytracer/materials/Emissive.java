@@ -2,6 +2,7 @@ package henaxel.raytracer.materials;
 
 import henaxel.node.BaseNode;
 import henaxel.raytracer.Ray;
+import henaxel.raytracer.node.InLink;
 import henaxel.raytracer.node.Node;
 import henaxel.raytracer.utils.Vec3;
 
@@ -11,7 +12,11 @@ public class Emissive extends Material {
     private Texture albedo;
 
     public Emissive(Texture texture) {
-        super("Emissive", null, null, null, null);
+        super("Emissive",
+                new InLink[] {
+                        new InLink("Albedo", null)
+        }
+        );
         albedo = texture;
     }
     public Emissive() { this(new ConstantTexture(1, 0.5, 0.5)); }

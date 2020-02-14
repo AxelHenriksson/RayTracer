@@ -1,38 +1,42 @@
 package henaxel.raytracer.materials;
 
-import henaxel.node.InLink;
-import henaxel.node.OutLink;
 import henaxel.raytracer.Ray;
-import henaxel.raytracer.node.Node;
+import henaxel.raytracer.node.InLink;
 import henaxel.raytracer.utils.*;
 
 
 import java.awt.*;
 
 public class Metal extends Material {
-    private double roughness;
-    private Color albedo;
+    private Texture roughness;
+    private Texture albedo;
 
 
-    public Metal() { this(new Color(255, 255, 255), 0); }
-    public Metal(Color albedo, double roughness) {
+    public Metal(Texture albedo, Texture roughness) {
+        super("Metal",
+                new InLink[] {
+                        new InLink("albedo", null),
+                        new InLink("roughness", null)
+                }
+        );
         this.albedo = albedo;
-        this.roughness = Utils.clamp(roughness, 0, 1);
+        this.roughness = roughness;
     }
+    public Metal(Texture albedo, double roughness) { this(albedo, new ConstantTexture(roughness, roughness, roughness)); }
     public Metal(double r, double g, double b, double roughness) {
-        this.albedo = new Color((float) r, (float) g, (float) b);
-        this.roughness = Utils.clamp(roughness, 0, 1);
+        this(new ConstantTexture(r, g, b), new ConstantTexture(roughness, roughness, roughness));
     }
+    public Metal() { this(0.5, 0.5, 0.5, 0.2); }
 
     //Surface scattering
     @Override
     public Ray scatter(Ray r, Vec3 pos, Vec3 n) {
         Vec3 reflected = Material.reflect(r.direction().unitVector(), n);
-        Vec3 scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness));
+        Vec3 scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness.color(0,0).getRed()/255.0)); //TODO: Implement proper uv mapping
 
         int tries = 0;
         while (Vec3.dot(scattered, n) <= 0 && tries < 50) {
-            scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness));
+            scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness.color(0,0).getRed()/255.0)); //TODO: Implement proper uv mapping
             tries++;
         }
 
@@ -43,27 +47,12 @@ public class Metal extends Material {
     @Override
     public Ray scatter(Ray r, Vec3 pos) {
         Vec3 reflected = Material.reflect(r.direction().unitVector(), Vec3.randomInUnitSphere());
-        Vec3 scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness));
+        Vec3 scattered = Vec3.add(reflected, Vec3.multiply(Vec3.randomInUnitSphere(), roughness.color(0,0).getRed()/255.0)); //TODO: Implement proper uv mapping
         return new Ray(pos, scattered);
     }
 
     @Override
-    public Color getAlbedo(double u, double v, Vec3 hitPos) {
-        return albedo;
-    }
-
-    @Override
-    public Node getNode() {
-        return new Node("Metal", Color.red,
-                new InLink[] {
-                     new InLink("Albedo", null),
-                     new InLink("Roughness", null)
-                },
-                new OutLink[] {
-                        new OutLink("Test", null)
-                })
-        {
-
-        };
+    public Color getAlbedo(double u, double v) {
+        return albedo.color(u, v);
     }
 }

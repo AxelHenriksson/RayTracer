@@ -1,8 +1,5 @@
 package henaxel.raytracer;
 
-import henaxel.node.Nodable;
-import henaxel.node.BaseNode;
-import henaxel.raytracer.node.Node;
 import henaxel.workbench.*;
 import henaxel.raytracer.utils.*;
 

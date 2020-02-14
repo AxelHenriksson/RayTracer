@@ -8,15 +8,20 @@ import java.awt.*;
 
 
 public class Node extends BaseNode {
-
-    protected Node(String name, Color color, String[] inputNames, Object[] inputs, String[] outputNames, OutLink[] outLinks) {
+    private InLink[] inlinks;
+    private OutLink[] outlinks;
+    
+    protected Node(String name, Color color, InLink[] inlinks, OutLink[] outlinks) {
         super(name, new BorderLayout());
 
+        this.inlinks = inlinks;
+        this.outlinks = outlinks;
+        
         setBackground(new Color(0, 0, 0, 0));
         setBorder(new LineBorder(Color.black, 2, true));
 
         //NameField
-        JLabel nameField = new JLabel(name);
+        JLabel nameField = new JLabel(name, SwingConstants.CENTER);
         nameField.setBackground(color);
         nameField.setForeground(Color.black);
         nameField.setBorder(new EmptyBorder(2, 4, 2, 4));
@@ -28,18 +33,18 @@ public class Node extends BaseNode {
 
         JPanel bodyPanel = new JPanel(new GridLayout(1, 2));
 
-        if(inputs != null) {
-            JPanel inputPanel = new JPanel(new GridLayout(inputs.length, 1));
-            for (int i = 0; i < inputs.length; i++) {
-                inputPanel.add(new NInputPanel(inputNames[i], inputs[i]));
+        if(inlinks != null) {
+            JPanel inputPanel = new JPanel(new GridLayout(inlinks.length, 1));
+            for (InLink inlink : inlinks) {
+                inputPanel.add(inlink);
             }
             bodyPanel.add(inputPanel);
         }
 
-        if(outLinks != null) {
-            JPanel outputPanel = new JPanel(new GridLayout(outLinks.length, 1));
-            for (OutLink link : outLinks) {
-                outputPanel.add(link);
+        if(outlinks != null) {
+            JPanel outputPanel = new JPanel(new GridLayout(outlinks.length, 1));
+            for (OutLink outlink : outlinks) {
+                outputPanel.add(outlink);
             }
             bodyPanel.add(outputPanel);
         }

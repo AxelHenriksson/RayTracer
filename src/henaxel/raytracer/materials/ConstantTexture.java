@@ -1,27 +1,21 @@
 package henaxel.raytracer.materials;
 
-import henaxel.node.BaseNode;
-import henaxel.raytracer.utils.Vec3;
 
 import java.awt.*;
 
-public class ConstantTexture implements Texture {
+public class ConstantTexture extends Texture {
     private Color color;
     
     public ConstantTexture(Color color) {
+        super("Constant Texture", null, null, null, null);
         this.color = color;
     }
     public ConstantTexture(double r, double g, double b) {
-        this.color = new Color((float)r, (float)g, (float)b);
+        this(new Color((float)r, (float)g, (float)b));
     }
     
     @Override
-    public Color color(double u, double v, Vec3 hitPos) {
+    public Color color(double u, double v) {
         return color;
-    }
-
-    @Override
-    public BaseNode getNode() {
-        return null;    //TODO: Implement
     }
 }

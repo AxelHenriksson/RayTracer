@@ -2,9 +2,8 @@ package henaxel.raytracer.materials;
 
 import java.awt.*;
 
-import henaxel.node.Nodable;
-import henaxel.node.BaseNodeEditor;
-import henaxel.node.OutLink;
+import henaxel.raytracer.node.InLink;
+import henaxel.raytracer.node.OutLink;
 import henaxel.raytracer.node.Node;
 import henaxel.raytracer.node.NodeEditor;
 import henaxel.raytracer.utils.Vec3;
@@ -12,8 +11,8 @@ import henaxel.raytracer.Ray;
 
 public abstract class Material extends Node {
 
-    public Material(String name, String[] inputNames, Object[] inputs, String[] outputNames, OutLink[] outLinks) {
-        super(name, Color.red, inputNames,  inputs,  outputNames,  outLinks);
+    public Material(String name, InLink[] inlinks) {
+        super(name, Color.red, inlinks, new OutLink[] { new OutLink(name, null) });
     }
 
     // Surface scattering
@@ -24,7 +23,7 @@ public abstract class Material extends Node {
     public abstract Color getAlbedo(double u, double v);
 
 
-    public void edit(NodeEditor editor) {
+    public void nodeEdit(NodeEditor editor) {
         editor.addNode(this);
     }
 

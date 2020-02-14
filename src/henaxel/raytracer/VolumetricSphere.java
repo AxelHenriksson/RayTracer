@@ -27,13 +27,13 @@ public class VolumetricSphere extends Sphere {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = mat.scatter(r, hitPos);
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0, hitPos)); //TODO : Look over the usage of u and v
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0)); //TODO : Implement proper uv mapping
                 } else {
                 if (t < t_max && t > t_min) {
                     Vec3 hitPos = r.pointAtParameter(t);
                     Vec3 n = Vec3.subtract(hitPos, pos).unitVector();
                     Ray scatter = new Ray(hitPos, r.direction());
-                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0, hitPos));//TODO : Look over the usage of u and v
+                    return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0));//TODO Implementing proper uv mapping
                 }
             }
         }

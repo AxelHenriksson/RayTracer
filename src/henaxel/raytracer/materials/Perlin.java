@@ -25,8 +25,21 @@ public class Perlin {
                 }
             }
         }
-        //System.out.printf("%2.3f %2.3f %2.3f", u, v, w);
         return perlinInterp(c, u, v, w);
+    }
+    public double noise(double u, double v) {
+        int i = (int)Math.floor(u);
+        int j = (int)Math.floor(v);
+        int k = 0;
+        Vec3[][][] c = new Vec3[2][2][2];
+        for(int di = 0; di < 2; di++) {
+            for (int dj = 0; dj < 2; dj++) {
+                for (int dk = 0; dk < 2; dk++) {
+                    c[di][dj][dk] = ranVec[permX[(i + di) & 255] ^ permY[(j + dj) & 255] ^ permZ[(k + dk) & 255]];
+                }
+            }
+        }
+        return perlinInterp(c, u, v, 0);
     }
     
     private static Vec3[] perlinGenerate() {
@@ -80,6 +93,19 @@ public class Perlin {
             accum+= weight*noise(tmp);
             weight *= 0.5;
             tmp = Vec3.multiply(tmp, 2);
+        }
+        return Math.abs(accum);
+    }
+    double turb(double u, double v, int depth) {
+        double accum = 0;
+        double i = u;
+        double j = v;
+        double weight = 1;
+        for (int k = 0; k < depth; k++) {
+            accum+= weight*noise(i, j);
+            weight *= 0.5;
+            i *= 2;
+            j *= 2;
         }
         return Math.abs(accum);
     }

@@ -27,7 +27,7 @@ public class Sphere extends Surface {
                 Ray scatter = mat.scatter(r, hitPos, n);
                 
                 double[] uv = getUV(hitPos);
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1], hitPos)); //TODO : Look over the usage of u and v
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1])); //TODO : Implement proper uv mapping
             }
             t = (-b + Math.sqrt(discriminant))/a;
             if (t < t_max && t > t_min) {
@@ -36,7 +36,7 @@ public class Sphere extends Surface {
                 Ray scatter = mat.scatter(r, hitPos, n);
 
                 double[] uv = getUV(hitPos);
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1], hitPos)); //TODO : Look over the usage of u and v
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1])); //TODO : Implementing proper uv mapping
             }
 
         }

@@ -13,8 +13,8 @@ public abstract class BaseNode extends JPanel {
         super(layoutManager);
         this.name = name;
     }
-
-
+    
+    @Override
     public String getName() { return name; }
 
     // LISTENER ----------------

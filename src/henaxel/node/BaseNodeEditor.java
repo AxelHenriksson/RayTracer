@@ -11,11 +11,10 @@ import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 
 import static java.awt.event.MouseEvent.BUTTON1;
-import static java.awt.event.MouseEvent.BUTTON2;
 
 public class BaseNodeEditor extends Workbench {
     private ArrayList<BaseNode> nodeList;
-    private Nodable[] nodableList;
+    private Class<BaseNode>[] nodableList;
 
     public BaseNodeEditor() {
         super(new JPanel(null));
@@ -40,10 +39,10 @@ public class BaseNodeEditor extends Workbench {
     }
 
     public BaseNode[] getNodeList() { return nodeList.toArray(new BaseNode[0]); }
-    public void setNodableList(Nodable... nodables) {
+    public void setNodeClassList(Class<BaseNode>... nodables) {
         this.nodableList = nodables;
     }
-    private Nodable[] getNodableList() { return nodableList; }
+    private Class<BaseNode>[] getNodeClassList() { return nodableList; }
 
     private void scaleWorkspace(MouseWheelEvent e) {
         int x = e.getX();
@@ -79,16 +78,16 @@ public class BaseNodeEditor extends Workbench {
 
     // POPUP MENU -----------
     private static class EditorPopup extends JPopupMenu {
-        Nodable[] nodableList;
+        Class<BaseNode>[] nodeClassList;
 
         public EditorPopup(BaseNodeEditor editor) {
-            nodableList = editor.getNodableList();
+            nodeClassList = editor.getNodeClassList();
 
             JMenu addNodeMenu = new JMenu("Add Node");
-            if(nodableList != null && nodableList.length > 0) {
-                for (Nodable nodable : nodableList) {
-                    JMenuItem item = new JMenuItem(nodable.getNode().getName());
-                    item.addActionListener(new PlaceNodeAction(editor, nodable));
+            if(nodeClassList != null && nodeClassList.length > 0) {
+                for (Class<BaseNode> nodeClass : nodeClassList) {
+                    JMenuItem item = new JMenuItem(nodeClass.getName());
+                    item.addActionListener(new PlaceNodeAction(editor, nodeClass));
                     addNodeMenu.add(item);
                 }
             }
@@ -98,15 +97,15 @@ public class BaseNodeEditor extends Workbench {
 
     public static class PlaceNodeAction extends AbstractAction {
         private BaseNodeEditor editor;
-        private BaseNode node;
+        private Class<BaseNode> nodeClass;
 
-        PlaceNodeAction(BaseNodeEditor editor, Nodable nodable) {
+        PlaceNodeAction(BaseNodeEditor editor, Class<BaseNode> nodeClass) {
             this.editor = editor;
-            this.node = node;
+            this.nodeClass = nodeClass;
         }
 
         public void actionPerformed(ActionEvent e) {
-                new EditorPlacementListener(editor, node);
+                new EditorPlacementListener(editor, nodeClass);
         }
     }
 
@@ -153,12 +152,13 @@ public class BaseNodeEditor extends Workbench {
 
     private static class EditorPlacementListener extends MouseInputAdapter {
         private BaseNodeEditor editor;
-        private Nodable nodable;
         private BaseNode node;
 
-        public EditorPlacementListener(BaseNodeEditor editor, BaseNode node) {
+        public EditorPlacementListener(BaseNodeEditor editor, Class<BaseNode> nodeClass) {
             this.editor = editor;
-            this.node = node;
+            try {
+                this.node = nodeClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) { e.printStackTrace(); }
             editor.getWorkSpace().addMouseListener(this);
             editor.getWorkSpace().addMouseMotionListener(this);
             editor.getWorkSpace().add(node);
@@ -172,12 +172,10 @@ public class BaseNodeEditor extends Workbench {
 
         @Override
         public void mousePressed(MouseEvent e) {
+            editor.getWorkSpace().remove(node);
             if(e.getButton() == BUTTON1) {
                 editor.addNode(node, e.getX(), e.getY());
-            } else if (e.getButton() == BUTTON2) {
-
             }
-            editor.getWorkSpace().remove(node);
             editor.revalidate();
             editor.getWorkSpace().removeMouseListener(this);
             editor.getWorkSpace().removeMouseMotionListener(this);

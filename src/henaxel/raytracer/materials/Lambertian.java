@@ -2,6 +2,7 @@ package henaxel.raytracer.materials;
 
 
 import henaxel.raytracer.Ray;
+import henaxel.raytracer.node.InLink;
 import henaxel.raytracer.utils.*;
 
 import java.awt.*;
@@ -10,7 +11,11 @@ public class Lambertian extends Material {
     private Texture albedo;
     
     public Lambertian(Texture texture) {
-        super("Lambertian", null, null, null, null);
+        super("Lambertian",
+                new InLink[] {
+                        new InLink("albedo", null),
+                }
+        );
         this.albedo = texture;
     }
     public Lambertian(Color albedo) { this(new ConstantTexture(albedo)); }
