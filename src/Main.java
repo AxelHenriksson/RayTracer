@@ -1,5 +1,6 @@
 import henaxel.raytracer.*;
 import henaxel.raytracer.materials.*;
+import henaxel.raytracer.node.NodeEditor;
 import henaxel.raytracer.utils.*;
 import henaxel.workbench.*;
 
@@ -10,13 +11,16 @@ public class Main {
 
     public static void main(String[] args) {
 
+
         BufferedImage testTex = ImageReader.loadBufferedImage("src/res/earthx5400x2700.jpg");
         
         Environment twoSpheres = new Environment();
         Texture checker = new CheckerTexture(new ConstantTexture(0.2, 0.3, 0.1), new ConstantTexture(0.9, 0.9, 0.9));
         Texture perTex = new NoiseTexture(1, 3);
         twoSpheres.add(new Sphere(new Vec3(0,-1000,0), 1000, new Lambertian(new ImageTexture(testTex))));
-        twoSpheres.add(new Sphere(new Vec3(0,2,0), 2, new Dielectric(1.5)));
+
+        Sphere metalSphere = new Sphere(new Vec3(0,2,0), 2, new Metal(new Color(100, 100, 100), 0.1));
+        twoSpheres.add(metalSphere);
 
         Vec3 lookFrom2 = new Vec3(6,6,6);
         Vec3 lookAt2 = new Vec3(0,2,0);
@@ -25,14 +29,22 @@ public class Main {
         Raytracer rt = new Raytracer();
         rt.setEnvironment(twoSpheres);
 
+
         Workbench wb = new Workbench(rt);
         //wb.add(new TabbedBar(rt.actionBar(), rt.propertiesBar()) BorderLayout.NORTH);
         wb.add(rt.actionBar(), BorderLayout.NORTH);
         wb.add(rt.propertiesBar(), BorderLayout.EAST);
 
 
+        //rt.traceShaded(true);
 
-        rt.traceShaded(true);
+        NodeEditor ne = new NodeEditor();
+        ne.add(ne.toolbarBasicTools(), BorderLayout.NORTH);
+        ne.setNodableList(
+                new Metal(),
+                new Lambertian());
+        metalSphere.getMaterial().edit(ne);
+
 
 
 

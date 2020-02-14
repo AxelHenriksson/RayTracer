@@ -1,10 +1,11 @@
 package henaxel.raytracer.materials;
 
+import henaxel.node.BaseNode;
 import henaxel.raytracer.utils.Vec3;
 
 import java.awt.*;
 
-public class CheckerTexture extends Texture {
+public class CheckerTexture implements Texture {
     private Texture odd;
     private Texture even;
     
@@ -14,12 +15,17 @@ public class CheckerTexture extends Texture {
     }
     
     @Override
-    Color color(double u, double v, Vec3 hitPos) {
+    public Color color(double u, double v, Vec3 hitPos) {
         double sines = Math.sin(10*hitPos.x)*Math.sin(10*hitPos.y)*Math.sin(10*hitPos.z);
         if (sines < 0) {
             return odd.color(u, v, hitPos);
         } else {
             return even.color(u, v, hitPos);
         }
+    }
+
+    @Override
+    public BaseNode getNode() {
+        return null;    //TODO: Implement
     }
 }

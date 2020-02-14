@@ -1,10 +1,11 @@
 package henaxel.raytracer.materials;
 
+import henaxel.node.BaseNode;
 import henaxel.raytracer.utils.Vec3;
 
 import java.awt.*;
 
-public class ConstantTexture extends Texture {
+public class ConstantTexture implements Texture {
     private Color color;
     
     public ConstantTexture(Color color) {
@@ -15,7 +16,12 @@ public class ConstantTexture extends Texture {
     }
     
     @Override
-    Color color(double u, double v, Vec3 hitPos) {
+    public Color color(double u, double v, Vec3 hitPos) {
         return color;
+    }
+
+    @Override
+    public BaseNode getNode() {
+        return null;    //TODO: Implement
     }
 }

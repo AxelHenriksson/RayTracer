@@ -1,7 +1,9 @@
 package henaxel.raytracer;
 
+import henaxel.raytracer.materials.Material;
+
 public abstract class Hitable {
-    
-    protected abstract HitResult hit(Ray r, double t_min, double t_max);
-    protected abstract AABB boundingBox();
+
+    abstract HitResult hit(Ray r, double t_min, double t_max);
+    abstract AABB boundingBox();
 }

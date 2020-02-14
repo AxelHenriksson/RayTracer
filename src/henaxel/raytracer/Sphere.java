@@ -35,7 +35,8 @@ public class Sphere extends Surface {
                 Vec3 n = Vec3.divide(Vec3.subtract(hitPos, pos), radius);
                 Ray scatter = mat.scatter(r, hitPos, n);
 
-                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(0, 0, hitPos)); //TODO : Look over the usage of u and v
+                double[] uv = getUV(hitPos);
+                return new HitResult(hitPos, n, t, scatter, mat.getAlbedo(uv[0], uv[1], hitPos)); //TODO : Look over the usage of u and v
             }
 
         }

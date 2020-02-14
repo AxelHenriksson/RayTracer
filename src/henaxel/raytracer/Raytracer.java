@@ -1,5 +1,8 @@
 package henaxel.raytracer;
 
+import henaxel.node.Nodable;
+import henaxel.node.BaseNode;
+import henaxel.raytracer.node.Node;
 import henaxel.workbench.*;
 import henaxel.raytracer.utils.*;
 
@@ -100,6 +103,7 @@ public class Raytracer extends JComponent {
             }
         }
 
+        // Initialize camera with new aspect ratio and image with new resolution
         env.activeCam.setAspectRatio((double)imageWidth/imageHeight);
         image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 
@@ -176,7 +180,7 @@ public class Raytracer extends JComponent {
         };
     }
 
-    //Get the renderThread bounds when inserting a new renderthread into an existing cell. Returns new cells bounds and shortens the existing in x
+    //Get the renderThread bounds when inserting a new renderThread into an existing cell. Returns new cells bounds and shortens the existing in x
     private int[] getNewThreadCellBounds() {
         for(RenderThread rThread : renderThreads) {
             if (rThread.isAlive() && rThread.endX - rThread.currentX > 20) {
@@ -211,7 +215,7 @@ public class Raytracer extends JComponent {
         return Utils.lerp(new Color(1.0f, 1.0f, 1.0f, 0.0f), new Color(0.5f, 0.7f, 1.0f, 0.0f), t);
     }
 
-    public void drawCoordImage() {
+    public void renderUVCoordImage() {
         for(int col = 0; col<imageWidth;col++) {
             for (int row = 0; row < imageHeight; row++) {
                 image.setRGB(col, row, new Color(col / (float)imageWidth, 1.0f-(row / (float)imageHeight), 0.0f).getRGB());
@@ -296,11 +300,6 @@ public class Raytracer extends JComponent {
             traceShaded(false);
         }
     }
-
-
-
-
-
 
 
     // TOOLS ---------------------------
